@@ -39,6 +39,9 @@ def log_interaction(db, user_id: str, product_id: str,
         "weight"     : ACTION_WEIGHTS.get(action, 1),
     }
     db.interactions.insert_one(doc)
+    # Alimentar el dataset CSV en tiempo real (no rompe la petición si falla)
+    from ml.export_dataset import append_interaction
+    append_interaction(doc)
     return doc
 
 

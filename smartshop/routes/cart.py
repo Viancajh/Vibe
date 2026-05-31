@@ -220,6 +220,13 @@ def checkout():
     }
     result = db.orders.insert_one(order)
 
+    # Alimentar el dataset CSV en tiempo real: agrega la orden a orders.csv
+    # y regenera products.csv (cambiaron stock y vendidos al comprar).
+    order["_id"] = result.inserted_id
+    from ml.export_dataset import append_order, export_products
+    append_order(order)
+    export_products(db)
+
     db.carts.update_one({"user_id": user_id}, {"$set": {"items": []}})
 
     return jsonify({
