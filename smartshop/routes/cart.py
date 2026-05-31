@@ -72,6 +72,7 @@ def add_to_cart():
             "name"       : product["name"],
             "price"      : product["price"],
             "image"      : product.get("image", ""),
+            "image_local": product.get("image_local", ""),
             "quantity"   : quantity,
         })
 

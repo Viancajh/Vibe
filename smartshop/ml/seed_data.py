@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database.mongodb import init_db
 from models.user import create_user
 from models.interaction import log_interaction
+from utils.images import local_image_url
 import random
 from datetime import datetime, timedelta
 
@@ -79,6 +80,11 @@ PRODUCTS = [
     {"name": "Freidora de Aire 5.5L", "description": "8 programas, pantalla digital, cocción sin aceite, bandeja extraíble.", "price": 2199.99, "category": "Hogar", "image": "https://http2.mlstatic.com/D_NQ_NP_978381-MLA84550112986_052025-O.webp", "stock": 20, "rating": 4.7, "views": 345, "purchases": 68},
     {"name": "Reloj de Pared Moderno", "description": "Mecanismo silencioso, números 3D, diámetro 35cm, pilas incluidas.", "price": 349.99, "category": "Hogar", "image": "https://i.pinimg.com/originals/ca/47/dd/ca47ddab1db42b20ca3b1ab3a0114de8.jpg", "stock": 52, "rating": 4.0, "views": 87, "purchases": 29},
 ]
+
+# Copia local servida por nosotros mismos (fallback si la URL remota falla).
+# Se descarga/optimiza con: python scripts/download_images.py
+for _p in PRODUCTS:
+    _p.setdefault("image_local", local_image_url(_p["name"]))
 
 # ── Usuarios de prueba ─────────────────────────────────────────
 TEST_USERS = [

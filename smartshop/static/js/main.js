@@ -19,6 +19,19 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+// Fallback de imágenes en cascada: si la URL remota falla, intenta la copia
+// local que servimos nosotros (data-local); si esa también falla, placeholder.
+function imgFallback(img) {
+    const local = img.getAttribute('data-local');
+    if (local && !img.dataset.triedLocal) {
+        img.dataset.triedLocal = '1';
+        img.src = local;
+    } else {
+        img.onerror = null;
+        img.src = '/static/images/placeholder.svg';
+    }
+}
+
 function goToCategory(cat) {
     const url = cat
         ? `/?category=${encodeURIComponent(cat)}#catalogo`

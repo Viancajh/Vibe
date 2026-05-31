@@ -201,7 +201,7 @@ function renderCard(p) {
     <div class="product-card" onclick="location.href='/product/${p._id}'"
          data-product-id="${p._id}" data-category="${escapeHtml(p.category)}">
         <div class="product-img-wrap">
-            <img src="${escapeHtml(p.image)}" alt="${name}" loading="lazy" onerror="this.src='/static/images/placeholder.svg'">
+            <img src="${escapeHtml(p.image)}" data-local="${escapeHtml(p.image_local || '')}" alt="${name}" loading="lazy" onerror="imgFallback(this)">
             <span class="product-cat-badge">${escapeHtml(p.category)}</span>
         </div>
         <span class="live-badge" data-viewers-for="${p._id}" style="display:none"></span>
@@ -251,7 +251,7 @@ function renderCardSmall(p) {
     const name = escapeHtml(p.name);
     return `
     <div class="product-card-sm" onclick="location.href='/product/${p._id}'">
-        <img src="${escapeHtml(p.image)}" alt="${name}" onerror="this.src='/static/images/placeholder.svg'">
+        <img src="${escapeHtml(p.image)}" data-local="${escapeHtml(p.image_local || '')}" alt="${name}" onerror="imgFallback(this)">
         <div><p>${name}</p><strong>${formatMoney(p.price)}</strong></div>
     </div>`;
 }

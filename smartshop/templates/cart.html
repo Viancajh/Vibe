@@ -82,8 +82,8 @@ async function loadCart() {
 
         itemsDiv.innerHTML = items.map(item => `
             <div class="cart-item" id="item-${item.product_id}">
-                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}"
-                     onerror="this.src='/static/images/placeholder.svg'">
+                <img src="${escapeHtml(item.image)}" data-local="${escapeHtml(item.image_local || '')}" alt="${escapeHtml(item.name)}"
+                     onerror="imgFallback(this)">
                 <div class="cart-item-info">
                     <h3>${escapeHtml(item.name)}</h3>
                     <p>Precio unitario: <strong>${formatMoney(item.price)}</strong></p>

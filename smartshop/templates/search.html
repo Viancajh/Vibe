@@ -33,8 +33,8 @@ async function runSearch(q) {
             ? data.map(p => `
                 <div class="product-card" onclick="location.href='/product/${p._id}'">
                     <div class="product-img-wrap">
-                        <img src="${p.image}" alt="${p.name}" loading="lazy"
-                             onerror="this.src='/static/images/placeholder.svg'">
+                        <img src="${p.image}" data-local="${escapeHtml(p.image_local || '')}" alt="${p.name}" loading="lazy"
+                             onerror="imgFallback(this)">
                         <span class="product-cat-badge">${p.category}</span>
                     </div>
                     <div class="product-info">
