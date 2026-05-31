@@ -1,0 +1,30 @@
+# =============================================================
+#  render.yaml — Blueprint de despliegue del backend Flask en Render
+#  (https://render.com).  El frontend va aparte en Netlify.
+#
+#  Importante: 1 solo worker (--workers 1) porque el broker de tiempo
+#  real (realtime.py) guarda los espectadores EN MEMORIA; con varios
+#  workers el conteo no se compartiría. Usamos hilos para el SSE.
+# =============================================================
+services:
+  - type: web
+    name: vibe-backend
+    runtime: python
+    rootDir: smartshop
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 1 --threads 16 --timeout 120 app:app
+    healthCheckPath: /api/products/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: MONGO_URI
+        sync: false          # pega aquí tu cadena de MongoDB Atlas en el dashboard
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false          # pon la URL de tu sitio Netlify, ej: https://vibe.netlify.app
+      - key: DEBUG
+        value: "False"

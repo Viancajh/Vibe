@@ -2,6 +2,8 @@
 #  app.py — Punto de entrada principal de Vibe
 #  Ejecutar: python app.py
 # =============================================================
+import os
+
 from flask import Flask, render_template, send_from_directory, redirect
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -26,7 +28,13 @@ app.config.from_object(Config)
 
 # ── Extensiones ───────────────────────────────────────────────
 jwt  = JWTManager(app)
-CORS(app, supports_credentials=True)
+
+# CORS: en local permite todo; en producción (Netlify) se restringe al
+# dominio del frontend con la variable de entorno CORS_ORIGINS
+# (separa varios con comas). Necesario porque el SSE va directo al backend.
+_cors_env = os.getenv("CORS_ORIGINS", "*").strip()
+_origins = "*" if _cors_env == "*" else [o.strip() for o in _cors_env.split(",") if o.strip()]
+CORS(app, resources={r"/api/*": {"origins": _origins}}, supports_credentials=True)
 
 # ── Registrar blueprints ──────────────────────────────────────
 app.register_blueprint(auth_bp)

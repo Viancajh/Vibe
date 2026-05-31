@@ -64,6 +64,9 @@
 
 <div id="toast" class="toast"></div>
 
+<!-- URL del backend (solo se usa para SSE; en local queda vacío = mismo origen).
+     El build estático para Netlify reemplaza el valor por la URL de Render. -->
+<script>window.BACKEND_URL = "{{ backend_url|default('') }}";</script>
 <script src="/static/js/main.js"></script>
 <script src="/static/js/tracker.js"></script>
 {% block scripts %}{% endblock %}

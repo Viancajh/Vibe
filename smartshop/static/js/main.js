@@ -1,4 +1,24 @@
 
+// ── Backend remoto (despliegue híbrido Netlify + Render) ──────
+// Cuando el frontend se sirve estático en Netlify, window.BACKEND_URL
+// (inyectado en base.html) apunta al Flask en Render. Reescribimos las
+// llamadas /api/* para que vayan a ese backend. En local queda vacío y
+// todo es del mismo origen, sin cambios.
+(function () {
+    const base = (window.BACKEND_URL || '').replace(/\/$/, '');
+    if (!base) return;
+    const toRemote = (u) =>
+        (typeof u === 'string' && u.startsWith('/api/')) ? base + u : u;
+
+    const realFetch = window.fetch.bind(window);
+    window.fetch = (url, opts) => realFetch(toRemote(url), opts);
+
+    if (navigator.sendBeacon) {
+        const realBeacon = navigator.sendBeacon.bind(navigator);
+        navigator.sendBeacon = (url, data) => realBeacon(toRemote(url), data);
+    }
+})();
+
 // ── Envío ────────────────────────────────────────────────────
 const ENVIO_GRATIS_DESDE = 1500;
 const COSTO_ENVIO        = 149;

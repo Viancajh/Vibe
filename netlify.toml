@@ -1,0 +1,34 @@
+# =============================================================
+#  netlify.toml — Frontend estático de Vibe en Netlify
+#
+#  El backend Flask vive en Render (ver render.yaml). Aquí solo se
+#  publica el frontend estático. TODAS las llamadas al backend (API y
+#  SSE) se dirigen a window.BACKEND_URL desde el cliente (ver base.html
+#  y el shim en static/js/main.js), así que NO hace falta proxy aquí.
+#
+#  Única variable a definir en Netlify (Site settings -> Environment):
+#    BACKEND_URL = https://vibe-backend.onrender.com   (tu URL de Render)
+# =============================================================
+[build]
+  base = "smartshop"
+  command = "pip install jinja2 && python scripts/build_static.py \"$BACKEND_URL\""
+  publish = "netlify_dist"
+
+[build.environment]
+  PYTHON_VERSION = "3.12"
+
+# ── Página de producto: /product/<id> sirve product.html ──────
+[[redirects]]
+  from = "/product/*"
+  to = "/product.html"
+  status = 200
+
+# ── Perfil redirige a la cuenta (igual que en Flask) ──────────
+[[redirects]]
+  from = "/profile"
+  to = "/cuenta#perfil"
+  status = 301
+[[redirects]]
+  from = "/perfil"
+  to = "/cuenta#perfil"
+  status = 301

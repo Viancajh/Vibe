@@ -11,5 +11,8 @@ venv/
 .env
 *.env
 
+# Build estático para Netlify (se genera, no se versiona)
+netlify_dist/
+
 # Sistema
 .DS_Store
