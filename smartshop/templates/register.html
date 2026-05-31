@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Crear cuenta — Vibe{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">V</div>
+            Vibe
+        </div>
+        <h2>Crear cuenta</h2>
+        <p class="auth-sub">Regístrate gratis y empieza a comprar hoy</p>
+
+        <div id="authError" class="auth-error" style="display:none"></div>
+
+        <div class="auth-form">
+            <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" id="name" placeholder="Tu nombre">
+            </div>
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                <input type="email" id="email" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="Mínimo 6 caracteres">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="doRegister()">Crear cuenta</button>
+        </div>
+
+        <p class="auth-switch">¿Ya tienes cuenta? <a href="/login">Iniciar sesión</a></p>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doRegister() {
+    const name=document.getElementById('name').value.trim(), email=document.getElementById('email').value.trim(), password=document.getElementById('password').value;
+    const errBox=document.getElementById('authError'); errBox.style.display='none';
+    if (!name||!email||!password) { errBox.textContent='Completa todos los campos.'; errBox.style.display='block'; return; }
+    try {
+        const res=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
+        const data=await res.json();
+        if (!res.ok) { errBox.textContent=data.error||'Error al crear la cuenta'; errBox.style.display='block'; return; }
+        localStorage.setItem('token',data.token); localStorage.setItem('user',JSON.stringify(data.user));
+        showToast('¡Cuenta creada! Bienvenido/a 🎉'); setTimeout(()=>location.href='/',800);
+    } catch(e) { errBox.textContent='Error de conexión.'; errBox.style.display='block'; }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vibe — Compra con estilo{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">
+            <div class="logo-icon">V</div>
+            <span class="logo-text">Vi<span>be</span></span>
+        </a>
+
+        <form class="nav-search" id="searchForm" onsubmit="handleSearch(event)">
+            <input type="text" id="searchInput" placeholder="Buscar productos, marcas y más..." autocomplete="off">
+            <button type="submit" class="btn-search">🔍</button>
+        </form>
+
+        <div class="nav-actions">
+            <span class="cart-icon" onclick="location.href='/cart'">
+                🛒 <span class="cart-badge" id="cartBadge">0</span>
+            </span>
+            <div id="userMenu" class="user-menu"></div>
+        </div>
+    </div>
+
+    <div class="nav-cats">
+        <a href="/?category=Tecnolog%C3%ADa#catalogo" class="cat-link">💻 Tecnología</a>
+        <a href="/?category=Gaming#catalogo" class="cat-link">🎮 Gaming</a>
+        <a href="/?category=Ropa#catalogo" class="cat-link">👕 Ropa</a>
+        <a href="/?category=Hogar#catalogo" class="cat-link">🏠 Hogar</a>
+        <a href="/?category=#catalogo" class="cat-link cat-all">Ver todo →</a>
+    </div>
+</nav>
+
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <strong>Vibe</strong>
+            <p>Tu estilo, tu compra. Sin complicaciones.</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">Inicio</a>
+            <a href="/cart">Carrito</a>
+            <a href="/cuenta">Mi cuenta</a>
+            <a href="/ml-lab">Laboratorio ML</a>
+            <a href="/api/dataset/interactions.csv" title="Dataset para el proyecto">Dataset CSV</a>
+        </div>
+        <div class="footer-info">
+            <small>© 2025 Vibe · Todos los derechos reservados</small>
+        </div>
+    </div>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="/static/js/main.js"></script>
+<script src="/static/js/tracker.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

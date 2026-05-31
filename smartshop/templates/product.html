@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Producto — Vibe{% endblock %}
+{% block content %}
+
+<div class="product-detail-wrap" id="productDetail">
+    <div class="loading-spinner">Cargando producto…</div>
+</div>
+
+<section class="section" id="relatedSection" style="display:none">
+    <div class="section-header">
+        <h2>🔗 También te puede interesar</h2>
+    </div>
+    <div class="products-grid" id="relatedGrid"></div>
+</section>
+
+{% endblock %}
+{% block scripts %}
+<script>
+const PRODUCT_ID  = "{{ product_id }}";
+let viewStartTime = Date.now();
+let product       = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadProduct();
+    loadRelated();
+});
+
+async function loadProduct() {
+    const wrap = document.getElementById('productDetail');
+    try {
+        const res = await fetch(`/api/products/${PRODUCT_ID}`);
+        product   = await res.json();
+        if (!res.ok) { wrap.innerHTML='<p class="empty-msg">Producto no encontrado.</p>'; return; }
+
+        const stars = '★'.repeat(Math.round(product.rating||3)) + '☆'.repeat(5-Math.round(product.rating||3));
+        wrap.innerHTML = `
+            <div class="product-detail">
+                <div class="detail-img-wrap">
+                    <img src="${product.image}" alt="${product.name}" onerror="this.src='/static/images/placeholder.svg'">
+                    <span class="product-cat-badge big">${product.category}</span>
+                </div>
+                <div class="detail-info">
+                    <h1>${product.name}</h1>
+                    <div class="detail-rating">${stars} <span style="color:var(--gray);font-size:.9rem">${product.rating} / 5 estrellas</span></div>
+                    <p class="detail-desc">${product.description}</p>
+                    <div class="detail-meta">
+                        <span>📦 ${product.stock} en stock</span>
+                        <span>👁️ ${product.views} vistas</span>
+                        <span>🛒 ${product.purchases} vendidos</span>
+                    </div>
+                    <div class="detail-price">$${product.price.toFixed(2)}</div>
+                    <div id="popularityBar" class="ml-prediction" style="display:none">
+                        <span class="ml-label">Popularidad del producto</span>
+                        <span id="predText"></span>
+                        <div class="prob-bar"><div class="prob-fill" id="probFill"></div></div>
+                    </div>
+                    <div class="detail-actions">
+                        <button class="btn btn-primary btn-lg" onclick="addToCartDetail()">🛒 Agregar al carrito</button>
+                        <button class="btn btn-outline-dark btn-lg" onclick="location.href='/'">← Volver</button>
+                    </div>
+                </div>
+            </div>`;
+
+        document.title = `${product.name} — Vibe`;
+        if (getToken()) {
+            document.getElementById('popularityBar').style.display = 'flex';
+            loadPopularity();
+            trackInteraction('click', product.category);
+        }
+    } catch(e) { wrap.innerHTML='<p class="empty-msg">Error al cargar el producto.</p>'; }
+}
+
+async function loadPopularity() {
+    try {
+        const res  = await apiFetch(`/api/recommendations/purchase-probability/${PRODUCT_ID}`);
+        const data = await res.json();
+        const pct  = Math.round(data.probability * 100);
+        document.getElementById('predText').textContent = pct > 70 ? `Muy popular entre clientes como tú (${pct}%)` : pct > 40 ? `Producto de interés moderado (${pct}%)` : `Producto de nicho (${pct}%)`;
+        const fill = document.getElementById('probFill');
+        fill.style.width      = `${pct}%`;
+        fill.style.background = pct > 70 ? '#10b981' : pct > 40 ? '#f59e0b' : '#3b82f6';
+    } catch(e) {}
+}
+
+async function loadRelated() {
+    const section = document.getElementById('relatedSection');
+    const grid    = document.getElementById('relatedGrid');
+    try {
+        const url = getToken() ? '/api/recommendations/for-you' : '/api/products/popular';
+        const res = getToken() ? await apiFetch(url) : await fetch(url);
+        const data = await res.json();
+        const filtered = data.filter(p => p._id !== PRODUCT_ID).slice(0, 4);
+        if (!filtered.length) return;
+        section.style.display = 'block';
+        grid.innerHTML = filtered.map(p => `
+            <div class="product-card" onclick="location.href='/product/${p._id}'">
+                <div class="product-img-wrap">
+                    <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='/static/images/placeholder.svg'">
+                    <span class="product-cat-badge">${p.category}</span>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">${p.name}</h3>
+                    <div class="product-footer">
+                        <span class="product-price">$${p.price.toFixed(2)}</span>
+                        <button class="btn-cart-small" data-id="${p._id}" data-name="${escapeHtml(p.name)}"
+                            onclick="event.stopPropagation();addToCartFromBtn(this)">+ Carrito</button>
+                    </div>
+                </div>
+            </div>`).join('');
+    } catch(e) {}
+}
+
+function addToCartDetail() { if (product) addToCart(PRODUCT_ID, product.name); }
+
+window.addEventListener('beforeunload', () => {
+    if (getToken() && product) {
+        const duration = Math.round((Date.now() - viewStartTime) / 1000);
+        navigator.sendBeacon('/api/interactions/track', JSON.stringify({product_id:PRODUCT_ID, action:'view', category:product.category, duration}));
+    }
+});
+</script>
+{% endblock %}

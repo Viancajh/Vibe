@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Mi cuenta — Vibe{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>👤 Mi cuenta</h1>
+</div>
+
+<div class="profile-layout">
+    <div class="profile-card">
+        <div class="avatar">👤</div>
+        <h2 id="userName">Cargando…</h2>
+        <p id="userEmail"></p>
+        <div class="profile-stats" id="profileStats"></div>
+        <button class="btn btn-outline-dark btn-full" style="margin-top:8px" onclick="logout()">Cerrar sesión</button>
+    </div>
+
+    <div class="profile-main">
+        <div class="ml-panel">
+            <h3>📊 Estadísticas de mi cuenta</h3>
+
+            <div class="insight-block">
+                <h4>🏷️ Categorías de interés</h4>
+                <div id="favCats" class="tag-list">Cargando…</div>
+            </div>
+
+            <div class="insight-block">
+                <h4>📈 Mi actividad</h4>
+                <div id="activityChart" class="activity-bars"></div>
+            </div>
+
+            <div class="insight-block">
+                <h4>🕐 Historial reciente</h4>
+                <div id="interactionHistory" class="history-list">Cargando…</div>
+            </div>
+
+            <div class="insight-block">
+                <h4>🧪 Proyecto ML (lista de cotejo)</h4>
+                <p class="checkout-hint" style="margin:0 0 12px">Graficas, metricas y predicciones para la evaluacion del TecNM.</p>
+                <a href="/ml-lab" class="btn btn-primary btn-sm">Abrir laboratorio ML</a>
+                <div class="tag-list" style="margin-top:12px">
+                    <a href="/api/dataset/interactions.csv" class="tag" style="text-decoration:none">interactions.csv</a>
+                    <a href="/api/dataset/orders.csv" class="tag" style="text-decoration:none">orders.csv</a>
+                    <a href="/api/dataset/products.csv" class="tag" style="text-decoration:none">products.csv</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!requireLogin()) return;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    document.getElementById('userName').textContent  = user.name  || 'Usuario';
+    document.getElementById('userEmail').textContent = user.email || '';
+    loadFavorites(); loadHistory();
+});
+
+async function loadFavorites() {
+    try {
+        const res  = await apiFetch('/api/interactions/favorites');
+        const data = await res.json();
+        const cats = data.favorite_categories || [];
+        const el   = document.getElementById('favCats');
+        el.innerHTML = cats.length
+            ? cats.map(c => `<span class="tag">${getCatEmoji(c)} ${c}</span>`).join('')
+            : '<span class="tag-empty">Sin datos aún. Explora la tienda.</span>';
+    } catch(e) {}
+}
+
+async function loadHistory() {
+    try {
+        const res   = await apiFetch('/api/interactions/history');
+        const items = await res.json();
+        const counts = {view:0, click:0, cart:0, purchase:0};
+        items.forEach(i => { if (counts[i.action]!==undefined) counts[i.action]++; });
+
+        document.getElementById('profileStats').innerHTML = `
+            <div class="stat"><strong>${items.length}</strong><small>Interacciones</small></div>
+            <div class="stat"><strong>${counts.purchase}</strong><small>Compras</small></div>
+            <div class="stat"><strong>${counts.cart}</strong><small>En carrito</small></div>`;
+
+        const maxVal = Math.max(...Object.values(counts), 1);
+        document.getElementById('activityChart').innerHTML = Object.entries(counts).map(([a,c]) => `
+            <div class="bar-row">
+                <span class="bar-label">${ACTION_LABELS[a]}</span>
+                <div class="bar-track"><div class="bar-fill" style="width:${(c/maxVal*100).toFixed(0)}%"></div></div>
+                <span class="bar-count">${c}</span>
+            </div>`).join('');
+
+        document.getElementById('interactionHistory').innerHTML = items.slice(0,15).map(i => `
+            <div class="history-item">
+                <span class="history-action">${ACTION_LABELS[i.action]||i.action}</span>
+                <span class="history-cat">${i.category||'—'}</span>
+                <span class="history-time">${new Date(i.timestamp).toLocaleDateString('es')}</span>
+            </div>`).join('') || '<p>Sin historial.</p>';
+    } catch(e) {}
+}
+
+const ACTION_LABELS = {view:'👁️ Vista', click:'🖱️ Click', cart:'🛒 Carrito', purchase:'✅ Compra', search:'🔍 Búsqueda'};
+function getCatEmoji(c) { return {Tecnología:'💻',Gaming:'🎮',Ropa:'👕',Hogar:'🏠'}[c]||''; }
+function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); showToast('Sesión cerrada'); setTimeout(()=>location.href='/',800); }
+</script>
+{% endblock %}

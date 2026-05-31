@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Vibe — Compra con estilo{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">✨ Envío gratis en compras desde $1,500</div>
+        <h1>Encuentra tu <span class="hero-accent">vibe</span><br>y llévatelo hoy</h1>
+        <p>Tech, gaming, ropa y hogar pensados para tu día a día.</p>
+        <div class="hero-btns">
+            <a href="/?category=#catalogo" class="btn btn-primary">Ver catálogo</a>
+            <a href="/register" class="btn btn-outline" id="heroRegisterBtn">Crear cuenta gratis</a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <a href="/politica-envios" class="hero-card hero-card-btn">
+            <div class="hero-card-icon">🚚</div>
+            <strong>Envío gratis</strong>
+            <span>Desde $1,500 · Ver política</span>
+        </a>
+        <a href="/politica-devoluciones" class="hero-card hero-card-btn">
+            <div class="hero-card-icon">🔄</div>
+            <strong>Devoluciones</strong>
+            <span>30 días · Ver política</span>
+        </a>
+        <a href="/metodos-pago" class="hero-card hero-card-btn">
+            <div class="hero-card-icon">🔒</div>
+            <strong>Pago seguro</strong>
+            <span>Métodos disponibles</span>
+        </a>
+    </div>
+</section>
+
+<!-- PARA TI (solo usuarios con sesión) -->
+<section class="section" id="forYouSection" style="display:none">
+    <div class="section-header">
+        <h2>⭐ Recomendado para ti</h2>
+    </div>
+    <div class="products-grid" id="forYouGrid">
+        <div class="skeleton-grid">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORÍAS -->
+<section class="section">
+    <h2 style="font-family:var(--font-display);font-size:1.55rem;font-weight:700;margin-bottom:22px">Explora por categoría</h2>
+    <div class="categories-grid">
+        <a href="/?category=Tecnolog%C3%ADa#catalogo" class="cat-card cat-tech">
+            <span class="cat-emoji">💻</span>
+            <strong>Tecnología</strong>
+            <small>Laptops, móviles, gadgets</small>
+        </a>
+        <a href="/?category=Gaming#catalogo" class="cat-card cat-gaming">
+            <span class="cat-emoji">🎮</span>
+            <strong>Gaming</strong>
+            <small>Consolas y periféricos</small>
+        </a>
+        <a href="/?category=Ropa#catalogo" class="cat-card cat-ropa">
+            <span class="cat-emoji">👕</span>
+            <strong>Ropa</strong>
+            <small>Moda y calzado</small>
+        </a>
+        <a href="/?category=Hogar#catalogo" class="cat-card cat-hogar">
+            <span class="cat-emoji">🏠</span>
+            <strong>Hogar</strong>
+            <small>Decoración y cocina</small>
+        </a>
+    </div>
+</section>
+
+<!-- CATÁLOGO -->
+<section class="section" id="catalogo">
+    <div class="section-header">
+        <h2 id="catalogTitle">📂 Todos los productos</h2>
+        <div class="filter-chips" id="filterChips">
+            <button class="chip active" data-cat="" onclick="filterProducts('')">Todo</button>
+            <button class="chip" data-cat="Tecnología" onclick="filterProducts('Tecnología')">💻 Tech</button>
+            <button class="chip" data-cat="Gaming" onclick="filterProducts('Gaming')">🎮 Gaming</button>
+            <button class="chip" data-cat="Ropa" onclick="filterProducts('Ropa')">👕 Ropa</button>
+            <button class="chip" data-cat="Hogar" onclick="filterProducts('Hogar')">🏠 Hogar</button>
+        </div>
+    </div>
+    <div class="products-grid" id="productsGrid">
+        <div class="loading-spinner">Cargando productos…</div>
+    </div>
+</section>
+
+<!-- VISTOS RECIENTEMENTE -->
+<section class="section" id="viewedSection" style="display:none">
+    <h2 style="font-family:var(--font-display);font-size:1.55rem;font-weight:700;margin-bottom:22px">👁️ Vistos recientemente</h2>
+    <div class="products-row" id="viewedGrid"></div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const hasCatParam = urlParams.has('category');
+// Sin ?category= en la URL → mostrar catálogo completo (chip "Todo")
+const initCategory = hasCatParam ? urlParams.get('category') : '';
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadProducts(initCategory);
+    activarChip(initCategory);
+    if (hasCatParam || location.hash === '#catalogo') {
+        setTimeout(() => {
+            document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+    }
+    if (getToken()) {
+        document.getElementById('forYouSection').style.display = 'block';
+        document.getElementById('viewedSection').style.display = 'block';
+        document.getElementById('heroRegisterBtn').style.display = 'none';
+        loadForYou();
+        loadViewedProducts();
+    }
+});
+
+function activarChip(cat) {
+    document.querySelectorAll('.chip').forEach(c => {
+        if (cat === null) {
+            c.classList.remove('active');
+        } else {
+            c.classList.toggle('active', c.dataset.cat === cat);
+        }
+    });
+}
+
+async function loadProducts(category) {
+    const grid  = document.getElementById('productsGrid');
+    const title = document.getElementById('catalogTitle');
+    let url;
+    if (category === null) {
+        url = '/api/products/popular';
+        title.textContent = '🔥 Más vendidos';
+    } else if (category === '') {
+        url = '/api/products/';
+        title.textContent = '📂 Todos los productos';
+    } else {
+        url = `/api/products/?category=${encodeURIComponent(category)}`;
+        title.textContent = `📂 ${category}`;
+    }
+    grid.innerHTML = '<div class="loading-spinner">Cargando productos…</div>';
+    try {
+        const res  = await fetch(url);
+        const data = await res.json();
+        grid.innerHTML = data.length
+            ? data.map(renderCard).join('')
+            : '<p class="empty-msg">Sin productos en esta categoría.</p>';
+    } catch (e) {
+        grid.innerHTML = '<p class="empty-msg">Error al cargar.</p>';
+    }
+}
+
+function filterProducts(cat) {
+    activarChip(cat);
+    const newUrl = cat
+        ? `/?category=${encodeURIComponent(cat)}#catalogo`
+        : '/?category=#catalogo';
+    history.replaceState(null, '', newUrl);
+    loadProducts(cat);
+    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function loadForYou() {
+    const grid = document.getElementById('forYouGrid');
+    try {
+        const res  = await apiFetch('/api/recommendations/for-you');
+        const data = await res.json();
+        grid.innerHTML = data.length
+            ? data.map(renderCard).join('')
+            : '<p class="empty-msg">Explora productos para ver recomendaciones.</p>';
+    } catch (e) {}
+}
+
+async function loadViewedProducts() {
+    const grid = document.getElementById('viewedGrid');
+    try {
+        const res  = await apiFetch('/api/interactions/viewed');
+        const data = await res.json();
+        if (data.length) {
+            grid.innerHTML = data.map(renderCardSmall).join('');
+        } else {
+            document.getElementById('viewedSection').style.display = 'none';
+        }
+    } catch (e) {}
+}
+
+function renderCard(p) {
+    const stars = '★'.repeat(Math.round(p.rating || 3)) + '☆'.repeat(5 - Math.round(p.rating || 3));
+    const name  = escapeHtml(p.name);
+    return `
+    <div class="product-card" onclick="location.href='/product/${p._id}'"
+         data-product-id="${p._id}" data-category="${escapeHtml(p.category)}">
+        <div class="product-img-wrap">
+            <img src="${escapeHtml(p.image)}" alt="${name}" loading="lazy" onerror="this.src='/static/images/placeholder.svg'">
+            <span class="product-cat-badge">${escapeHtml(p.category)}</span>
+        </div>
+        <div class="product-info">
+            <h3 class="product-name">${name}</h3>
+            <div class="product-rating">${stars} <small>(${p.rating})</small></div>
+            <div class="product-footer">
+                <span class="product-price">${formatMoney(p.price)}</span>
+                <button class="btn-cart-small" data-id="${p._id}" data-name="${name}"
+                    onclick="event.stopPropagation();addToCartFromBtn(this)">+ Carrito</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderCardSmall(p) {
+    const name = escapeHtml(p.name);
+    return `
+    <div class="product-card-sm" onclick="location.href='/product/${p._id}'">
+        <img src="${escapeHtml(p.image)}" alt="${name}" onerror="this.src='/static/images/placeholder.svg'">
+        <div><p>${name}</p><strong>${formatMoney(p.price)}</strong></div>
+    </div>`;
+}
+</script>
+{% endblock %}

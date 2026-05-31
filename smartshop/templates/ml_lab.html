@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Laboratorio ML — Vibe{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1> Laboratorio ML</h1>
+    <p class="page-sub">Proyecto integrador — Aprendizaje Automatizado (lista de cotejo)</p>
+</div>
+
+<div class="checklist-grid" id="checklist">
+    <div class="check-item"><span>1</span> Analisis estadistico</div>
+    <div class="check-item"><span>2</span> 5 graficas matplotlib</div>
+    <div class="check-item"><span>3</span> Preprocesamiento + PCA</div>
+    <div class="check-item"><span>4</span> KMeans (no supervisado)</div>
+    <div class="check-item"><span>5</span> Clasificacion supervisada</div>
+    <div class="check-item"><span>6</span> Regresion supervisada</div>
+    <div class="check-item"><span>7</span> Red neuronal (ANN)</div>
+    <div class="check-item"><span>8</span> Metricas de desempeno</div>
+    <div class="check-item wide"><span>9</span> Pagina web funcional (esta pagina + tienda Vibe)</div>
+</div>
+
+<div id="mlAlert" class="demo-banner" style="display:none"></div>
+
+<section class="ml-lab-section">
+    <h2>Metricas del proyecto</h2>
+    <div id="metricasBox" class="metricas-box">Cargando metricas…</div>
+    <p class="checkout-hint">Si no hay datos, ejecuta en terminal: <code>python ml\analisis_proyecto.py</code></p>
+</section>
+
+<section class="ml-lab-section">
+    <h2>Graficas del analisis (matplotlib)</h2>
+    <div class="graficas-grid" id="graficasGrid"></div>
+</section>
+
+<div class="ml-predict-grid">
+    <section class="checkout-card">
+        <h3>5. Clasificacion — Predecir cluster</h3>
+        <p class="checkout-hint">Ingresa puntaje de interes por categoria (0-100). Basado en KMeans + RandomForest.</p>
+        <div class="form-group"><label>Tecnología</label><input type="number" id="cTech" value="60" min="0"></div>
+        <div class="form-group"><label>Gaming</label><input type="number" id="cGame" value="40" min="0"></div>
+        <div class="form-group"><label>Ropa</label><input type="number" id="cRopa" value="15" min="0"></div>
+        <div class="form-group"><label>Hogar</label><input type="number" id="cHogar" value="10" min="0"></div>
+        <button class="btn btn-primary btn-full" onclick="predecirCluster()">Predecir cluster</button>
+        <div id="resCluster" class="pred-result"></div>
+    </section>
+
+    <section class="checkout-card">
+        <h3>6. Regresion — Predecir precio</h3>
+        <p class="checkout-hint">LinearRegression: rating, vistas, compras y stock → precio estimado.</p>
+        <div class="form-group"><label>Rating (1-5)</label><input type="number" id="rRating" value="4.5" step="0.1" min="1" max="5"></div>
+        <div class="form-group"><label>Vistas</label><input type="number" id="rViews" value="250" min="0"></div>
+        <div class="form-group"><label>Compras</label><input type="number" id="rPurchases" value="45" min="0"></div>
+        <div class="form-group"><label>Stock</label><input type="number" id="rStock" value="20" min="0"></div>
+        <button class="btn btn-primary btn-full" onclick="predecirPrecio()">Predecir precio</button>
+        <div id="resReg" class="pred-result"></div>
+    </section>
+
+    <section class="checkout-card">
+        <h3>7. Red neuronal — Predecir precio</h3>
+        <p class="checkout-hint">MLPRegressor (ANN): mismas entradas, prediccion de precio.</p>
+        <div class="form-group"><label>Rating (1-5)</label><input type="number" id="aRating" value="4.5" step="0.1" min="1" max="5"></div>
+        <div class="form-group"><label>Vistas</label><input type="number" id="aViews" value="250" min="0"></div>
+        <div class="form-group"><label>Compras</label><input type="number" id="aPurchases" value="45" min="0"></div>
+        <div class="form-group"><label>Stock</label><input type="number" id="aStock" value="20" min="0"></div>
+        <button class="btn btn-primary btn-full" onclick="predecirAnn()">Predecir con ANN</button>
+        <div id="resAnn" class="pred-result"></div>
+    </section>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadMetricas();
+    loadGraficas();
+});
+
+async function loadMetricas() {
+    const box = document.getElementById('metricasBox');
+    const alert = document.getElementById('mlAlert');
+    try {
+        const res = await fetch('/api/ml/metricas');
+        const data = await res.json();
+        if (!res.ok) {
+            alert.style.display = 'block';
+            alert.innerHTML = '<strong>Falta entrenar</strong> Ejecuta <code>python ml\\analisis_proyecto.py</code> en la carpeta smartshop.';
+            box.innerHTML = '<p class="empty-msg">Sin metricas aun.</p>';
+            return;
+        }
+        box.innerHTML = `
+            <div class="metric-row"><strong>Normalidad (Shapiro)</strong><span>${data.normalidad?.interpretacion || '—'} (p=${data.normalidad?.p_valor ?? '—'})</span></div>
+            <div class="metric-row"><strong>Outliers (IQR)</strong><span>${data.outliers?.cantidad ?? '—'} detectados en price_norm</span></div>
+            <div class="metric-row"><strong>ANOVA</strong><span>${data.anova?.interpretacion || '—'} (p=${data.anova?.p_valor ?? '—'})</span></div>
+            <div class="metric-row"><strong>PCA</strong><span>${data.preprocesamiento?.varianza_total_pct ?? '—'}% varianza explicada</span></div>
+            <div class="metric-row"><strong>KMeans (no supervisado)</strong><span>Silhouette = ${data.no_supervisado?.silhouette ?? '—'} | ${data.no_supervisado?.n_clusters ?? '—'} clusters</span></div>
+            <div class="metric-row"><strong>Clasificacion</strong><span>Accuracy = ${((data.clasificacion?.accuracy ?? 0) * 100).toFixed(1)}%</span></div>
+            <div class="metric-row"><strong>Regresion</strong><span>R² = ${data.regresion?.r2 ?? '—'} | MAE = $${data.regresion?.mae ?? '—'}</span></div>
+            <div class="metric-row"><strong>Red neuronal</strong><span>R² = ${data.ann?.r2 ?? '—'} | MAE = $${data.ann?.mae ?? '—'}</span></div>`;
+    } catch (e) {
+        box.innerHTML = '<p class="empty-msg">Error al cargar metricas.</p>';
+    }
+}
+
+async function loadGraficas() {
+    const grid = document.getElementById('graficasGrid');
+    try {
+        const res = await fetch('/api/ml/graficas');
+        const urls = await res.json();
+        if (!urls.length) {
+            grid.innerHTML = '<p class="empty-msg">Genera las graficas con analisis_proyecto.py</p>';
+            return;
+        }
+        const titulos = {
+            '01_normalidad.png': '1. Normalidad',
+            '02_descriptivos.png': '2. Descriptivos',
+            '03_outliers.png': '3. Outliers',
+            '04_correlacion.png': '4. Correlacion',
+            '05_anova.png': '5. ANOVA',
+            '06_pca.png': '6. PCA',
+            '07_kmeans.png': '7. KMeans',
+        };
+        grid.innerHTML = urls.map(u => {
+            const name = u.split('/').pop();
+            return `<figure class="grafica-card"><img src="${u}" alt="${name}"><figcaption>${titulos[name] || name}</figcaption></figure>`;
+        }).join('');
+    } catch (e) {}
+}
+
+async function predecirCluster() {
+    const body = {
+        'Tecnología': +document.getElementById('cTech').value,
+        'Gaming': +document.getElementById('cGame').value,
+        'Ropa': +document.getElementById('cRopa').value,
+        'Hogar': +document.getElementById('cHogar').value,
+    };
+    const res = await fetch('/api/ml/predecir-cluster', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const data = await res.json();
+    document.getElementById('resCluster').innerHTML = res.ok
+        ? `<strong>Cluster ${data.cluster_predicho}</strong><br>${data.mensaje}`
+        : `<span style="color:#dc2626">${data.error}</span>`;
+}
+
+async function predecirPrecio() {
+    const body = { rating:+document.getElementById('rRating').value, views:+document.getElementById('rViews').value, purchases:+document.getElementById('rPurchases').value, stock:+document.getElementById('rStock').value };
+    const res = await fetch('/api/ml/predecir-precio', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const data = await res.json();
+    document.getElementById('resReg').innerHTML = res.ok
+        ? `<strong>$${data.precio_predicho.toFixed(2)}</strong><br>R²=${data.metricas_modelo?.r2} | MAE=$${data.metricas_modelo?.mae}`
+        : `<span style="color:#dc2626">${data.error}</span>`;
+}
+
+async function predecirAnn() {
+    const body = { rating:+document.getElementById('aRating').value, views:+document.getElementById('aViews').value, purchases:+document.getElementById('aPurchases').value, stock:+document.getElementById('aStock').value };
+    const res = await fetch('/api/ml/predecir-precio-ann', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const data = await res.json();
+    document.getElementById('resAnn').innerHTML = res.ok
+        ? `<strong>$${data.precio_predicho.toFixed(2)}</strong><br>R²=${data.metricas_modelo?.r2} | MAE=$${data.metricas_modelo?.mae}`
+        : `<span style="color:#dc2626">${data.error}</span>`;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Compra confirmada — Vibe{% endblock %}
+{% block content %}
+
+<div class="success-wrapper">
+    <div class="success-card">
+        <div class="success-icon">✅</div>
+        <h1>¡Gracias por tu compra!</h1>
+        <p class="success-sub">Tu pago fue procesado correctamente. Te enviamos la confirmación a tu correo.</p>
+
+        <div class="success-details" id="successDetails"></div>
+
+        <div class="success-actions">
+            <a href="/cuenta?pedido=ORDER_PLACEHOLDER" id="trackBtn" class="btn btn-primary">Ver seguimiento del pedido</a>
+            <a href="/" class="btn btn-outline">Seguir comprando</a>
+        </div>
+    </div>
+</div>
+
+<div class="checkout-steps" style="max-width:520px;margin:32px auto 0">
+    <span class="step done">1. Carrito</span>
+    <span class="step-arrow">→</span>
+    <span class="step done">2. Pago</span>
+    <span class="step-arrow">→</span>
+    <span class="step active">3. Confirmación</span>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(location.search);
+    const total  = params.get('total') || '0.00';
+    const method = params.get('method') || 'tarjeta';
+    const order  = params.get('order') || '';
+    const tracking = params.get('tracking') || '';
+    const labels = { tarjeta: 'Tarjeta', transferencia: 'Transferencia SPEI', efectivo: 'Efectivo contra entrega' };
+
+    document.getElementById('successDetails').innerHTML = `
+        <div class="summary-row"><span>Número de pedido</span><span><strong>#${order.slice(-6).toUpperCase()}</strong></span></div>
+        <div class="summary-row"><span>Guía de envío</span><span><strong>${tracking || '—'}</strong></span></div>
+        <div class="summary-row"><span>Total pagado</span><span><strong>$${total}</strong></span></div>
+        <div class="summary-row"><span>Método de pago</span><span>${labels[method] || method}</span></div>
+        <div class="summary-row"><span>Estado</span><span class="free">Pedido confirmado</span></div>`;
+
+    const trackBtn = document.getElementById('trackBtn');
+    if (order) {
+        trackBtn.href = `/cuenta?pedido=${order}#pedidos`;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Buscar — Vibe{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>🔍 Resultados de búsqueda</h1>
+    <p id="searchSummary"></p>
+</div>
+
+<div class="products-grid" id="searchResults">
+    <div class="loading-spinner">Buscando…</div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const q = new URLSearchParams(window.location.search).get('q') || '';
+    if (q) {
+        document.getElementById('searchInput').value = q;
+        runSearch(q);
+    }
+});
+
+async function runSearch(q) {
+    const grid    = document.getElementById('searchResults');
+    const summary = document.getElementById('searchSummary');
+    try {
+        const res  = await fetch(`/api/products/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        summary.textContent = `${data.length} resultado(s) para "${q}"`;
+        grid.innerHTML = data.length
+            ? data.map(p => `
+                <div class="product-card" onclick="location.href='/product/${p._id}'">
+                    <div class="product-img-wrap">
+                        <img src="${p.image}" alt="${p.name}" loading="lazy"
+                             onerror="this.src='/static/images/placeholder.svg'">
+                        <span class="product-cat-badge">${p.category}</span>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${p.name}</h3>
+                        <p class="product-desc-short">${p.description.substring(0,80)}…</p>
+                        <div class="product-footer">
+                            <span class="product-price">$${p.price.toFixed(2)}</span>
+                            <button class="btn-cart-small" data-id="${p._id}" data-name="${escapeHtml(p.name)}"
+                                onclick="event.stopPropagation();addToCartFromBtn(this)">
+                                + Carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>`).join('')
+            : `<div class="empty-cart">
+                   <div class="empty-icon">🔍</div>
+                   <h3>Sin resultados</h3>
+                   <p>Intenta con otra palabra clave</p>
+               </div>`;
+    } catch(e) {
+        grid.innerHTML = '<p class="empty-msg">Error al buscar.</p>';
+    }
+}
+</script>
+{% endblock %}

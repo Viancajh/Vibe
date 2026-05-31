@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Carrito — Vibe{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>🛒 Mi Carrito</h1>
+</div>
+
+<div class="cart-layout">
+    <div class="cart-items" id="cartItems">
+        <div class="loading-spinner">Cargando carrito…</div>
+    </div>
+    <div class="cart-summary" id="cartSummary" style="display:none">
+        <h3>Resumen del pedido</h3>
+        <div class="summary-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+        <div class="summary-row"><span>Envío</span><span id="shippingCost">—</span></div>
+        <p id="shippingNote" class="checkout-hint" style="margin:0"></p>
+        <div class="summary-row total"><span>Total</span><span id="totalPrice">$0.00</span></div>
+        <button class="btn btn-primary btn-full" onclick="location.href='/checkout'">
+            Continuar al pago →
+        </button>
+        <button class="btn btn-outline btn-full" onclick="location.href='/'">
+            Seguir comprando
+        </button>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!requireLogin()) return;
+    loadCart();
+});
+
+function actualizarResumen(subtotal) {
+    const envio = calcularEnvio(subtotal);
+    const total = subtotal + envio;
+    const falta = ENVIO_GRATIS_DESDE - subtotal;
+
+    document.getElementById('subtotal').textContent = formatMoney(subtotal);
+    document.getElementById('shippingCost').textContent = envio === 0 ? 'Gratis' : formatMoney(envio);
+    document.getElementById('shippingCost').className = envio === 0 ? 'free' : '';
+    document.getElementById('totalPrice').textContent = formatMoney(total);
+
+    const note = document.getElementById('shippingNote');
+    if (envio === 0) {
+        note.textContent = '¡Envío gratis aplicado! (compras desde $1,500)';
+    } else if (falta > 0) {
+        note.textContent = `Agrega ${formatMoney(falta)} más para envío gratis`;
+    } else {
+        note.textContent = '';
+    }
+}
+
+async function loadCart() {
+    const itemsDiv = document.getElementById('cartItems');
+    try {
+        const res  = await apiFetch('/api/cart/');
+        if (res.status === 401) {
+            location.href = '/login';
+            return;
+        }
+        const cart = await res.json();
+        const items = cart.items || [];
+
+        if (!items.length) {
+            itemsDiv.innerHTML = `
+                <div class="empty-cart">
+                    <div class="empty-icon">🛒</div>
+                    <h3>Tu carrito está vacío</h3>
+                    <p>Agrega productos desde el catálogo</p>
+                    <a href="/" class="btn btn-primary">Ver productos</a>
+                </div>`;
+            document.getElementById('cartSummary').style.display = 'none';
+            return;
+        }
+
+        const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+        actualizarResumen(subtotal);
+        document.getElementById('cartSummary').style.display = 'block';
+
+        itemsDiv.innerHTML = items.map(item => `
+            <div class="cart-item" id="item-${item.product_id}">
+                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}"
+                     onerror="this.src='/static/images/placeholder.svg'">
+                <div class="cart-item-info">
+                    <h3>${escapeHtml(item.name)}</h3>
+                    <p>Precio unitario: <strong>${formatMoney(item.price)}</strong></p>
+                    <p>Cantidad: <strong>${item.quantity}</strong></p>
+                    <p>Subtotal: <strong>${formatMoney(item.price * item.quantity)}</strong></p>
+                </div>
+                <button class="btn-remove" onclick="removeItem('${item.product_id}')">
+                    Eliminar
+                </button>
+            </div>`).join('');
+
+    } catch (e) {
+        itemsDiv.innerHTML = '<p class="empty-msg">No se pudo cargar el carrito.</p>';
+    }
+}
+
+async function removeItem(productId) {
+    try {
+        await apiFetch(`/api/cart/remove/${productId}`, { method: 'DELETE' });
+        showToast('Producto eliminado del carrito');
+        loadCart();
+        updateCartBadge();
+    } catch (e) {}
+}
+</script>
+{% endblock %}

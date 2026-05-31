@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}Finalizar compra — Vibe{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h1>Pago seguro</h1>
+    <p class="page-sub">Completa tu compra. Tus datos están protegidos con cifrado SSL.</p>
+</div>
+
+<div class="checkout-steps">
+    <span class="step done">1. Carrito</span>
+    <span class="step-arrow">→</span>
+    <span class="step active">2. Pago</span>
+    <span class="step-arrow">→</span>
+    <span class="step">3. Confirmación</span>
+</div>
+
+<div class="checkout-layout" id="checkoutRoot">
+    <div class="loading-spinner">Cargando tu pedido…</div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!requireLogin()) return;
+    loadCheckout();
+});
+
+let cartItems = [];
+let cartTotal = 0;
+
+async function loadCheckout() {
+    const root = document.getElementById('checkoutRoot');
+    try {
+        const res  = await apiFetch('/api/cart/');
+        const cart = await res.json();
+        cartItems = cart.items || [];
+
+        if (!cartItems.length) {
+            root.innerHTML = `
+                <div class="empty-cart" style="grid-column:1/-1">
+                    <div class="empty-icon">🛒</div>
+                    <h3>No hay productos para pagar</h3>
+                    <p>Agrega artículos al carrito antes de continuar.</p>
+                    <a href="/" class="btn btn-primary">Ir al catálogo</a>
+                </div>`;
+            return;
+        }
+
+        cartTotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
+        const cartShipping = calcularEnvio(cartTotal);
+        const falta = ENVIO_GRATIS_DESDE - cartTotal;
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        root.innerHTML = `
+            <div class="checkout-main">
+                <section class="checkout-card">
+                    <h3>Datos de envío</h3>
+                    <div class="form-group">
+                        <label>Nombre completo</label>
+                        <input type="text" id="shipName" value="${escapeHtml(user.name || '')}" placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <input type="text" id="shipAddress" placeholder="Calle, número, colonia">
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>Ciudad</label>
+                            <input type="text" id="shipCity" placeholder="Ciudad">
+                        </div>
+                        <div class="form-group">
+                            <label>Código postal</label>
+                            <input type="text" id="shipZip" placeholder="00000" maxlength="10">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="checkout-card">
+                    <h3>Método de pago</h3>
+                    <div class="payment-options">
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="tarjeta" checked onchange="togglePayment()">
+                            <span class="payment-icon">💳</span>
+                            <span><strong>Tarjeta de crédito / débito</strong><small>Visa, Mastercard, Amex</small></span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="transferencia" onchange="togglePayment()">
+                            <span class="payment-icon">🏦</span>
+                            <span><strong>Transferencia SPEI</strong><small>Confirmación en minutos</small></span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="efectivo" onchange="togglePayment()">
+                            <span class="payment-icon">💵</span>
+                            <span><strong>Efectivo contra entrega</strong><small>Paga al recibir</small></span>
+                        </label>
+                    </div>
+
+                    <div id="payTarjeta" class="pay-panel">
+                        <div class="form-group">
+                            <label>Número de tarjeta</label>
+                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre del titular</label>
+                            <input type="text" id="cardHolder" value="${escapeHtml(user.name || '')}" placeholder="Como en la tarjeta" autocomplete="cc-name">
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Vencimiento</label>
+                                <input type="text" id="cardExp" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp">
+                            </div>
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="password" id="cardCvv" placeholder="•••" maxlength="4" autocomplete="cc-csc">
+                            </div>
+                        </div>
+                        <label class="save-card-check">
+                            <input type="checkbox" id="saveCard" checked> Guardar tarjeta para futuras compras
+                        </label>
+                    </div>
+
+                    <div id="payTransfer" class="pay-panel" style="display:none">
+                        <div class="bank-info">
+                            <p><strong>Banco:</strong> BBVA México</p>
+                            <p><strong>CLABE:</strong> 012180001234567890</p>
+                            <p><strong>Beneficiario:</strong> Vibe Commerce SA de CV</p>
+                            <p class="checkout-hint">Usa tu número de pedido como referencia al transferir.</p>
+                        </div>
+                    </div>
+
+                    <div id="payEfectivo" class="pay-panel" style="display:none">
+                        <div class="bank-info">
+                            <p>Pagarás en efectivo al momento de la entrega. Prepara el monto exacto si es posible.</p>
+                        </div>
+                    </div>
+
+                    <p class="secure-badge">🔒 Conexión segura · Cifrado SSL 256-bit</p>
+                </section>
+            </div>
+
+            <aside class="cart-summary checkout-summary">
+                <h3>Resumen del pedido</h3>
+                <ul class="checkout-items">
+                    ${cartItems.map(i => `
+                        <li><span>${escapeHtml(i.name)} × ${i.quantity}</span><span>${formatMoney(i.price * i.quantity)}</span></li>`).join('')}
+                </ul>
+                <div class="summary-row"><span>Subtotal</span><span>${formatMoney(cartTotal)}</span></div>
+                <div class="summary-row"><span>Envío</span><span>${cartShipping === 0 ? 'Gratis' : formatMoney(cartShipping)}</span></div>
+                <p id="chkShipNote" class="checkout-hint" style="margin:0;font-size:.8rem"></p>
+                <div class="summary-row total"><span>Total</span><span>${formatMoney(cartTotal + cartShipping)}</span></div>
+                <button class="btn btn-primary btn-full" id="payBtn" onclick="placeOrder()">Pagar ahora</button>
+                <a href="/cart" class="btn btn-outline btn-full">← Volver al carrito</a>
+            </aside>`;
+
+        togglePayment();
+        const note = document.getElementById('chkShipNote');
+        if (note) {
+            note.textContent = cartShipping === 0
+                ? 'Envío gratis aplicado'
+                : `Agrega ${formatMoney(falta)} más para envío gratis`;
+        }
+        document.getElementById('cardNumber')?.addEventListener('input', formatCardInput);
+    } catch (e) {
+        root.innerHTML = '<p class="empty-msg">No se pudo cargar el pedido.</p>';
+    }
+}
+
+function togglePayment() {
+    const m = document.querySelector('input[name="payment"]:checked')?.value || 'tarjeta';
+    document.getElementById('payTarjeta').style.display = m === 'tarjeta' ? 'block' : 'none';
+    document.getElementById('payTransfer').style.display = m === 'transferencia' ? 'block' : 'none';
+    document.getElementById('payEfectivo').style.display = m === 'efectivo' ? 'block' : 'none';
+}
+
+function formatCardInput(e) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 16);
+    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function getPaymentMethod() {
+    return document.querySelector('input[name="payment"]:checked')?.value || 'tarjeta';
+}
+
+async function placeOrder() {
+    const name    = document.getElementById('shipName')?.value.trim();
+    const address = document.getElementById('shipAddress')?.value.trim();
+    const city    = document.getElementById('shipCity')?.value.trim();
+    const zip     = document.getElementById('shipZip')?.value.trim();
+    const method  = getPaymentMethod();
+
+    if (!name || !address || !city) {
+        showToast('Completa los datos de envío');
+        return;
+    }
+
+    let cardPayload = null;
+    if (method === 'tarjeta') {
+        const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
+        const holder = document.getElementById('cardHolder').value.trim();
+        const exp = document.getElementById('cardExp').value.trim();
+        const cvv = document.getElementById('cardCvv').value.trim();
+        if (num.length < 13 || !holder || !exp || cvv.length < 3) {
+            showToast('Completa los datos de la tarjeta');
+            return;
+        }
+        cardPayload = {
+            number: num, holder, exp,
+            save: document.getElementById('saveCard').checked
+        };
+    }
+
+    const btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.textContent = 'Procesando pago…';
+
+    try {
+        const res = await apiFetch('/api/cart/checkout', {
+            method: 'POST',
+            body: JSON.stringify({
+                payment_method: method,
+                shipping: { name, address, city, zip: zip || '' },
+                card: cardPayload
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showToast(data.error || 'No se pudo procesar el pago');
+            btn.disabled = false;
+            btn.textContent = 'Pagar ahora';
+            return;
+        }
+        updateCartBadge();
+        const q = new URLSearchParams({
+            total: data.total.toFixed(2),
+            method: data.payment_method,
+            order: data.order_id || '',
+            tracking: data.tracking_number || ''
+        });
+        location.href = '/order-success?' + q.toString();
+    } catch (e) {
+        showToast('Error de conexión');
+        btn.disabled = false;
+        btn.textContent = 'Pagar ahora';
+    }
+}
+</script>
+{% endblock %}

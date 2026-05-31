@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+{% block title %}Mi cuenta — Vibe{% endblock %}
+{% block content %}
+
+<div class="cuenta-layout">
+    <aside class="cuenta-sidebar">
+        <a href="/" class="cuenta-brand">
+            <div class="logo-icon">V</div>
+            <span class="logo-text">Vi<span>be</span></span>
+        </a>
+        <p class="cuenta-sidebar-sub">Tu cuenta</p>
+        <nav class="cuenta-nav">
+            <button class="cuenta-nav-item active" data-tab="perfil" onclick="showTab('perfil')">👤 Perfil</button>
+            <button class="cuenta-nav-item" data-tab="tarjetas" onclick="showTab('tarjetas')">💳 Tarjetas</button>
+            <button class="cuenta-nav-item" data-tab="pedidos" onclick="showTab('pedidos')">📦 Mis pedidos</button>
+        </nav>
+        <button class="btn btn-outline-dark btn-full" style="margin-top:auto" onclick="logout()">Cerrar sesión</button>
+    </aside>
+
+    <div class="cuenta-main">
+        <!-- PERFIL -->
+        <section id="tab-perfil" class="cuenta-panel active">
+            <h1>Perfil</h1>
+            <p class="page-sub">Tu información personal y configuración de cuenta</p>
+            <div id="profileAlert" class="profile-alert" style="display:none"></div>
+
+            <div class="checkout-card" style="margin-bottom:20px">
+                <div class="profile-header-inline">
+                    <div class="avatar">👤</div>
+                    <div>
+                        <h2 id="userName">—</h2>
+                        <p id="userEmail" class="checkout-hint"></p>
+                        <p id="memberSince" class="checkout-hint"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-card profile-form-card">
+                <h3>Información personal</h3>
+                <p class="checkout-hint">Actualiza tu nombre y correo de contacto</p>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Nombre completo</label>
+                        <input type="text" id="editName" placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Correo electrónico</label>
+                        <input type="email" id="editEmail" placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono (opcional)</label>
+                        <input type="tel" id="editPhone" placeholder="55 1234 5678">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveProfile()">Guardar cambios</button>
+            </div>
+
+            <div class="checkout-card profile-form-card">
+                <h3>Cambiar contraseña</h3>
+                <p class="checkout-hint">Por seguridad, ingresa tu contraseña actual</p>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Contraseña actual</label>
+                        <input type="password" id="currentPassword" autocomplete="current-password">
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva contraseña</label>
+                        <input type="password" id="newPassword" autocomplete="new-password" minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar nueva contraseña</label>
+                        <input type="password" id="confirmPassword" autocomplete="new-password">
+                    </div>
+                </div>
+                <button class="btn btn-outline-dark" onclick="changePassword()">Actualizar contraseña</button>
+            </div>
+
+            <div class="checkout-card profile-form-card">
+                <h3>Configuración de la cuenta</h3>
+                <label class="settings-row">
+                    <div>
+                        <strong>Notificaciones por correo</strong>
+                        <p class="checkout-hint">Confirmaciones de pedido y novedades de Vibe</p>
+                    </div>
+                    <input type="checkbox" id="notifEmail" onchange="saveSettings()">
+                </label>
+                <label class="settings-row">
+                    <div>
+                        <strong>Ofertas personalizadas</strong>
+                        <p class="checkout-hint">Recomendaciones según tus compras</p>
+                    </div>
+                    <input type="checkbox" id="notifOffers" onchange="saveSettings()">
+                </label>
+            </div>
+
+            <div class="ml-panel">
+                <h3>Actividad en la tienda</h3>
+                <div class="profile-stats" id="profileStats"></div>
+                <div class="insight-block">
+                    <h4>Categorías de interés</h4>
+                    <div id="favCats" class="tag-list"></div>
+                </div>
+                <div class="insight-block">
+                    <h4>Actividad reciente</h4>
+                    <div id="interactionHistory" class="history-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TARJETAS -->
+        <section id="tab-tarjetas" class="cuenta-panel">
+            <h1>Tarjetas</h1>
+            <p class="page-sub">Administra tus métodos de pago guardados</p>
+            <div id="cardsList" class="cards-grid"></div>
+            <div class="checkout-card" style="margin-top:20px">
+                <h3>Agregar tarjeta</h3>
+                <div class="form-row-2">
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Número de tarjeta</label>
+                        <input type="text" id="newCardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+                    <div class="form-group">
+                        <label>Titular</label>
+                        <input type="text" id="newCardHolder" placeholder="Como aparece en la tarjeta">
+                    </div>
+                    <div class="form-group">
+                        <label>Vencimiento</label>
+                        <input type="text" id="newCardExp" placeholder="MM/AA" maxlength="5">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveCard()">Guardar tarjeta</button>
+            </div>
+        </section>
+
+        <!-- PEDIDOS -->
+        <section id="tab-pedidos" class="cuenta-panel">
+            <h1>Mis pedidos</h1>
+            <p class="page-sub">Consulta el estado y seguimiento de tus compras</p>
+            <div id="ordersList"></div>
+            <div id="orderDetail" class="checkout-card" style="display:none;margin-top:20px"></div>
+        </section>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!requireLogin()) return;
+    const hash = normalizeTab(location.hash.replace('#', '') || 'perfil');
+    showTab(hash);
+    loadPerfil();
+    loadCards();
+    loadOrders();
+    const pedidoId = new URLSearchParams(location.search).get('pedido');
+    if (pedidoId && pedidoId !== 'ORDER_PLACEHOLDER') {
+        showTab('pedidos');
+        setTimeout(() => showOrderDetail(pedidoId), 300);
+    }
+});
+
+const TAB_ALIASES = {
+    perfil: 'perfil', profile: 'perfil',
+    tarjetas: 'tarjetas', cards: 'tarjetas',
+    pedidos: 'pedidos', orders: 'pedidos'
+};
+
+function normalizeTab(tab) {
+    const key = TAB_ALIASES[tab] || tab;
+    return ['perfil', 'tarjetas', 'pedidos'].includes(key) ? key : 'perfil';
+}
+
+function showTab(tab) {
+    tab = normalizeTab(tab);
+    ['perfil', 'tarjetas', 'pedidos'].forEach(t => {
+        document.getElementById('tab-' + t)?.classList.toggle('active', t === tab);
+        document.querySelector(`.cuenta-nav-item[data-tab="${t}"]`)?.classList.toggle('active', t === tab);
+    });
+    history.replaceState(null, '', location.pathname + location.search + '#' + tab);
+}
+
+function showProfileAlert(msg, type = 'error') {
+    const el = document.getElementById('profileAlert');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'profile-alert ' + type;
+    el.style.display = 'block';
+    if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function handleSessionError(res) {
+    if (res.status === 401 || res.status === 404) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        showToast('Tu sesión expiró. Inicia sesión de nuevo.');
+        setTimeout(() => location.href = '/login?msg=session', 1200);
+        return true;
+    }
+    return false;
+}
+
+function applyUserData(data) {
+    localStorage.setItem('user', JSON.stringify({
+        name: data.name, email: data.email, id: data._id
+    }));
+    document.getElementById('userName').textContent = data.name || 'Usuario';
+    document.getElementById('userEmail').textContent = data.email || '';
+    document.getElementById('editName').value = data.name || '';
+    document.getElementById('editEmail').value = data.email || '';
+    document.getElementById('editPhone').value = data.phone || '';
+    document.getElementById('notifEmail').checked = data.notifications !== false;
+    document.getElementById('notifOffers').checked = data.offers !== false;
+    if (data.member_since) {
+        document.getElementById('memberSince').textContent =
+            'Cliente desde ' + new Date(data.member_since).toLocaleDateString('es');
+    }
+    initNavbar();
+}
+
+async function loadPerfil() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.name) document.getElementById('userName').textContent = user.name;
+    if (user.email) document.getElementById('userEmail').textContent = user.email;
+
+    try {
+        const res = await apiFetch('/api/account/profile');
+        const data = await res.json();
+        if (handleSessionError(res)) return;
+        if (!res.ok) {
+            showProfileAlert(data.error || 'No se pudo cargar tu perfil');
+            return;
+        }
+        applyUserData(data);
+    } catch (e) {
+        showProfileAlert('Error de conexión al cargar el perfil');
+    }
+
+    try {
+        const res = await apiFetch('/api/interactions/favorites');
+        if (handleSessionError(res)) return;
+        const data = await res.json();
+        const cats = data.favorite_categories || [];
+        document.getElementById('favCats').innerHTML = cats.length
+            ? cats.map(c => `<span class="tag">${c}</span>`).join('')
+            : '<span class="tag-empty">Explora la tienda para ver recomendaciones.</span>';
+    } catch (e) {}
+
+    try {
+        const res = await apiFetch('/api/interactions/history');
+        if (handleSessionError(res)) return;
+        const items = await res.json();
+        const counts = { view: 0, click: 0, cart: 0, purchase: 0 };
+        items.forEach(i => { if (counts[i.action] !== undefined) counts[i.action]++; });
+        document.getElementById('profileStats').innerHTML = `
+            <div class="stat"><strong>${items.length}</strong><small>Interacciones</small></div>
+            <div class="stat"><strong>${counts.purchase}</strong><small>Compras</small></div>
+            <div class="stat"><strong>${counts.cart}</strong><small>En carrito</small></div>`;
+        document.getElementById('interactionHistory').innerHTML = items.slice(0, 8).map(i => `
+            <div class="history-item">
+                <span class="history-action">${ACTION_LABELS[i.action] || i.action}</span>
+                <span class="history-cat">${i.category || '—'}</span>
+                <span class="history-time">${new Date(i.timestamp).toLocaleDateString('es')}</span>
+            </div>`).join('') || '<p class="empty-msg">Sin actividad aún.</p>';
+    } catch (e) {}
+}
+
+async function saveProfile() {
+    const name  = document.getElementById('editName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    if (!name || !email) {
+        showProfileAlert('Nombre y correo son obligatorios');
+        return;
+    }
+    const res = await apiFetch('/api/account/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ name, email, phone })
+    });
+    const data = await res.json();
+    if (handleSessionError(res)) return;
+    if (!res.ok) {
+        showProfileAlert(data.error || 'Error al guardar');
+        return;
+    }
+    applyUserData(data.user);
+    showProfileAlert('Perfil actualizado correctamente', 'success');
+    showToast('Perfil guardado');
+}
+
+async function changePassword() {
+    const current_password = document.getElementById('currentPassword').value;
+    const new_password     = document.getElementById('newPassword').value;
+    const confirm_password = document.getElementById('confirmPassword').value;
+    if (!current_password || !new_password || !confirm_password) {
+        showProfileAlert('Completa todos los campos de contraseña');
+        return;
+    }
+    const res = await apiFetch('/api/account/password', {
+        method: 'PUT',
+        body: JSON.stringify({ current_password, new_password, confirm_password })
+    });
+    const data = await res.json();
+    if (handleSessionError(res)) return;
+    if (!res.ok) {
+        showProfileAlert(data.error || 'Error al cambiar contraseña');
+        return;
+    }
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    showProfileAlert('Contraseña actualizada correctamente', 'success');
+    showToast('Contraseña actualizada');
+}
+
+async function saveSettings() {
+    const notifications = document.getElementById('notifEmail').checked;
+    const offers        = document.getElementById('notifOffers').checked;
+    const res = await apiFetch('/api/account/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ notifications, offers })
+    });
+    if (handleSessionError(res)) return;
+    if (res.ok) showToast('Preferencias guardadas');
+}
+
+async function loadCards() {
+    const box = document.getElementById('cardsList');
+    try {
+        const res = await apiFetch('/api/account/cards');
+        if (handleSessionError(res)) return;
+        const cards = await res.json();
+        if (!cards.length) {
+            box.innerHTML = '<p class="empty-msg">No tienes tarjetas guardadas. Agrega una abajo o al pagar.</p>';
+            return;
+        }
+        box.innerHTML = cards.map(c => `
+            <div class="saved-card">
+                <div class="saved-card-top">
+                    <strong>${escapeHtml(c.brand)}</strong>
+                    ${c.default ? '<span class="tag">Principal</span>' : ''}
+                </div>
+                <div class="saved-card-number">•••• •••• •••• ${escapeHtml(c.last4)}</div>
+                <div class="saved-card-meta">${escapeHtml(c.holder)} · Vence ${escapeHtml(c.exp)}</div>
+                <button class="btn-remove" onclick="deleteCard('${c.id}')">Eliminar</button>
+            </div>`).join('');
+    } catch (e) {
+        box.innerHTML = '<p class="empty-msg">No se pudieron cargar las tarjetas.</p>';
+    }
+}
+
+async function saveCard() {
+    const number = document.getElementById('newCardNumber').value.replace(/\s/g, '');
+    const holder = document.getElementById('newCardHolder').value.trim();
+    const exp    = document.getElementById('newCardExp').value.trim();
+    if (number.length < 13 || !holder || !exp) {
+        showToast('Completa todos los datos de la tarjeta');
+        return;
+    }
+    const res = await apiFetch('/api/account/cards', {
+        method: 'POST',
+        body: JSON.stringify({ number, holder, exp, default: true })
+    });
+    if (res.ok) {
+        showToast('Tarjeta guardada');
+        document.getElementById('newCardNumber').value = '';
+        document.getElementById('newCardHolder').value = '';
+        document.getElementById('newCardExp').value = '';
+        loadCards();
+    } else {
+        const d = await res.json();
+        showToast(d.error || 'Error al guardar');
+    }
+}
+
+async function deleteCard(id) {
+    await apiFetch(`/api/account/cards/${id}`, { method: 'DELETE' });
+    showToast('Tarjeta eliminada');
+    loadCards();
+}
+
+async function loadOrders() {
+    const box = document.getElementById('ordersList');
+    try {
+        const res = await apiFetch('/api/account/orders');
+        if (handleSessionError(res)) return;
+        const orders = await res.json();
+        if (!orders.length) {
+            box.innerHTML = `
+                <div class="empty-cart">
+                    <div class="empty-icon">📦</div>
+                    <h3>Aún no tienes pedidos</h3>
+                    <p>Cuando compres algo, aparecerá aquí con su seguimiento.</p>
+                    <a href="/" class="btn btn-primary">Ir a comprar</a>
+                </div>`;
+            return;
+        }
+        box.innerHTML = orders.map(o => `
+            <div class="order-card" onclick="showOrderDetail('${o._id}')">
+                <div class="order-card-head">
+                    <strong>Pedido #${o._id.slice(-6).toUpperCase()}</strong>
+                    <span class="order-status">${escapeHtml(o.tracking_status)}</span>
+                </div>
+                <p class="checkout-hint">${new Date(o.created_at).toLocaleDateString('es')} · ${o.items.length} producto(s) · ${formatMoney(o.total)}</p>
+                <p class="tracking-id">Guía: ${escapeHtml(o.tracking_number)}</p>
+            </div>`).join('');
+    } catch (e) {
+        box.innerHTML = '<p class="empty-msg">Error al cargar pedidos.</p>';
+    }
+}
+
+async function showOrderDetail(orderId) {
+    const box = document.getElementById('orderDetail');
+    box.style.display = 'block';
+    box.innerHTML = '<p class="loading-spinner">Cargando seguimiento…</p>';
+    const res = await apiFetch(`/api/account/orders/${orderId}`);
+    if (handleSessionError(res)) return;
+    const o = await res.json();
+    if (!res.ok) { box.innerHTML = '<p class="empty-msg">Pedido no encontrado.</p>'; return; }
+
+    const metodos = { tarjeta: 'Tarjeta', transferencia: 'Transferencia', efectivo: 'Efectivo contra entrega' };
+    box.innerHTML = `
+        <h3>Seguimiento del pedido</h3>
+        <p><strong>Guía:</strong> ${escapeHtml(o.tracking_number)}</p>
+        <p class="checkout-hint">Enviado a: ${escapeHtml(o.shipping.name)}, ${escapeHtml(o.shipping.address)}, ${escapeHtml(o.shipping.city)}</p>
+        <div class="tracking-timeline">
+            ${o.tracking_steps.map(s => `
+                <div class="track-step ${s.done ? 'done' : ''}">
+                    <div class="track-dot"></div>
+                    <div>
+                        <strong>${escapeHtml(s.label)}</strong>
+                        ${s.date ? `<small>${new Date(s.date).toLocaleString('es')}</small>` : ''}
+                    </div>
+                </div>`).join('')}
+        </div>
+        <hr style="margin:20px 0;border:none;border-top:1px solid var(--border)">
+        <h4>Productos</h4>
+        <ul class="checkout-items">
+            ${o.items.map(i => `<li><span>${escapeHtml(i.name)} × ${i.quantity}</span><span>${formatMoney(i.price * i.quantity)}</span></li>`).join('')}
+        </ul>
+        <div class="summary-row"><span>Subtotal</span><span>${formatMoney(o.subtotal)}</span></div>
+        <div class="summary-row"><span>Envío</span><span>${o.shipping_cost === 0 ? 'Gratis' : formatMoney(o.shipping_cost)}</span></div>
+        <div class="summary-row total"><span>Total</span><span>${formatMoney(o.total)}</span></div>
+        <div class="summary-row"><span>Pago</span><span>${metodos[o.payment_method] || o.payment_method}</span></div>`;
+    box.scrollIntoView({ behavior: 'smooth' });
+}
+
+const ACTION_LABELS = { view: 'Vista', click: 'Click', cart: 'Carrito', purchase: 'Compra', search: 'Búsqueda' };
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    showToast('Sesión cerrada');
+    setTimeout(() => location.href = '/', 800);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,196 @@
+{
+  "normalidad": {
+    "variable": "rating",
+    "test": "Shapiro-Wilk",
+    "estadistico": 0.9569,
+    "p_valor": 0.0469,
+    "interpretacion": "No se cumple normalidad (p<=0.05)"
+  },
+  "descriptivos": {
+    "n_views": {
+      "count": 55.0,
+      "mean": 1.0,
+      "std": 0.0,
+      "min": 1.0,
+      "25%": 1.0,
+      "50%": 1.0,
+      "75%": 1.0,
+      "max": 1.0
+    },
+    "n_clicks": {
+      "count": 55.0,
+      "mean": 0.564,
+      "std": 0.501,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 1.0,
+      "75%": 1.0,
+      "max": 1.0
+    },
+    "n_cart": {
+      "count": 55.0,
+      "mean": 0.218,
+      "std": 0.417,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 0.0,
+      "75%": 0.0,
+      "max": 1.0
+    },
+    "avg_duration": {
+      "count": 55.0,
+      "mean": 49.691,
+      "std": 34.445,
+      "min": 5.0,
+      "25%": 21.0,
+      "50%": 44.0,
+      "75%": 77.5,
+      "max": 115.0
+    },
+    "price_norm": {
+      "count": 55.0,
+      "mean": 2.91,
+      "std": 3.462,
+      "min": 0.07,
+      "25%": 0.75,
+      "50%": 1.1,
+      "75%": 4.0,
+      "max": 13.0
+    },
+    "rating": {
+      "count": 55.0,
+      "mean": 4.347,
+      "std": 0.256,
+      "min": 3.9,
+      "25%": 4.1,
+      "50%": 4.3,
+      "75%": 4.5,
+      "max": 4.9
+    }
+  },
+  "outliers": {
+    "variable": "price_norm",
+    "metodo": "IQR (1.5)",
+    "cantidad": 5,
+    "limite_inferior": -4.125,
+    "limite_superior": 8.875
+  },
+  "correlacion": {
+    "n_views": {
+      "n_views": NaN,
+      "n_clicks": NaN,
+      "n_cart": NaN,
+      "avg_duration": NaN,
+      "price_norm": NaN,
+      "rating": NaN,
+      "purchased": NaN
+    },
+    "n_clicks": {
+      "n_views": NaN,
+      "n_clicks": 1.0,
+      "n_cart": 0.199,
+      "avg_duration": 0.542,
+      "price_norm": 0.117,
+      "rating": 0.063,
+      "purchased": -0.06
+    },
+    "n_cart": {
+      "n_views": NaN,
+      "n_clicks": 0.199,
+      "n_cart": 1.0,
+      "avg_duration": 0.024,
+      "price_norm": 0.024,
+      "rating": -0.012,
+      "purchased": 0.093
+    },
+    "avg_duration": {
+      "n_views": NaN,
+      "n_clicks": 0.542,
+      "n_cart": 0.024,
+      "avg_duration": 1.0,
+      "price_norm": 0.103,
+      "rating": -0.003,
+      "purchased": 0.019
+    },
+    "price_norm": {
+      "n_views": NaN,
+      "n_clicks": 0.117,
+      "n_cart": 0.024,
+      "avg_duration": 0.103,
+      "price_norm": 1.0,
+      "rating": 0.33,
+      "purchased": -0.146
+    },
+    "rating": {
+      "n_views": NaN,
+      "n_clicks": 0.063,
+      "n_cart": -0.012,
+      "avg_duration": -0.003,
+      "price_norm": 0.33,
+      "rating": 1.0,
+      "purchased": -0.181
+    },
+    "purchased": {
+      "n_views": NaN,
+      "n_clicks": -0.06,
+      "n_cart": 0.093,
+      "avg_duration": 0.019,
+      "price_norm": -0.146,
+      "rating": -0.181,
+      "purchased": 1.0
+    }
+  },
+  "anova": {
+    "variable_entrada": "n_cart",
+    "variable_objetivo": "purchased",
+    "f_estadistico": 0.4663,
+    "p_valor": 0.4977,
+    "interpretacion": "Sin diferencia significativa"
+  },
+  "graficas": [
+    "01_normalidad.png",
+    "02_descriptivos.png",
+    "03_outliers.png",
+    "04_correlacion.png",
+    "05_anova.png",
+    "06_pca.png",
+    "07_kmeans.png"
+  ],
+  "preprocesamiento": {
+    "estandarizacion": "StandardScaler (media=0, std=1)",
+    "normalizacion": "MinMaxScaler (rango 0-1)",
+    "pca_componentes": 3,
+    "varianza_explicada": [
+      0.3305,
+      0.2549,
+      0.1966
+    ],
+    "varianza_total_pct": 78.19
+  },
+  "no_supervisado": {
+    "algoritmo": "KMeans",
+    "n_clusters": 4,
+    "silhouette": 0.2804,
+    "interpretacion_silhouette": "Cercano a 1 = clusters bien separados"
+  },
+  "clasificacion": {
+    "algoritmo": "RandomForestClassifier",
+    "objetivo": "Predecir cluster (basado en KMeans)",
+    "accuracy": 0.0,
+    "reporte": "              precision    recall  f1-score   support\n\n           0       0.00      0.00      0.00       1.0\n           1       0.00      0.00      0.00       0.0\n           3       0.00      0.00      0.00       1.0\n\n    accuracy                           0.00       2.0\n   macro avg       0.00      0.00      0.00       2.0\nweighted avg       0.00      0.00      0.00       2.0\n"
+  },
+  "regresion": {
+    "algoritmo": "LinearRegression",
+    "r2": -64.8959,
+    "mae": 3990.38,
+    "mse": 18655388.06,
+    "rmse": 4319.19
+  },
+  "ann": {
+    "algoritmo": "MLPRegressor",
+    "capas": "64, 32",
+    "r2": -17.9603,
+    "mae": 1774.81,
+    "mse": 5367730.62
+  }
+}
