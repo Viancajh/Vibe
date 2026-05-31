@@ -39,7 +39,7 @@ async function doRegister() {
     const errBox=document.getElementById('authError'); errBox.style.display='none';
     if (!name||!email||!password) { errBox.textContent='Completa todos los campos.'; errBox.style.display='block'; return; }
     try {
-        const res=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
+        const res=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password,guest_id:getGuestId()})});
         const data=await res.json();
         if (!res.ok) { errBox.textContent=data.error||'Error al crear la cuenta'; errBox.style.display='block'; return; }
         localStorage.setItem('token',data.token); localStorage.setItem('user',JSON.stringify(data.user));

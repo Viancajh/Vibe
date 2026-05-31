@@ -8,6 +8,30 @@ from models.user import create_user, verify_password, get_user_by_id, serialize_
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
+def _reclamar_invitado(db, guest_id, user_id):
+    """Al iniciar sesión/registrarse, reasigna a la cuenta los pedidos,
+    interacciones y carrito que se hicieron como invitado en ese navegador.
+    Solo acepta ids que empiezan con 'guest-' (evita reclamar datos ajenos)."""
+    if not guest_id or not str(guest_id).startswith("guest-") or guest_id == user_id:
+        return
+    db.orders.update_many({"user_id": guest_id}, {"$set": {"user_id": user_id}})
+    db.interactions.update_many({"user_id": guest_id}, {"$set": {"user_id": user_id}})
+
+    # Fusionar el carrito de invitado dentro del carrito del usuario
+    guest_cart = db.carts.find_one({"user_id": guest_id})
+    if guest_cart and guest_cart.get("items"):
+        user_cart = db.carts.find_one({"user_id": user_id}) or {"items": []}
+        items = user_cart.get("items", [])
+        por_id = {i["product_id"]: i for i in items}
+        for gi in guest_cart["items"]:
+            if gi["product_id"] in por_id:
+                por_id[gi["product_id"]]["quantity"] += gi["quantity"]
+            else:
+                items.append(gi)
+        db.carts.update_one({"user_id": user_id}, {"$set": {"items": items}}, upsert=True)
+        db.carts.delete_one({"user_id": guest_id})
+
+
 @auth_bp.route("/register", methods=["POST"])
 def register():
     """POST /api/auth/register — Crea una cuenta nueva."""
@@ -26,6 +50,7 @@ def register():
     if user is None:
         return jsonify({"error": "El email ya está registrado"}), 409
 
+    _reclamar_invitado(db, data.get("guest_id"), str(user["_id"]))
     token = create_access_token(identity=str(user["_id"]))
     return jsonify({
         "message" : "Cuenta creada exitosamente",
@@ -46,6 +71,7 @@ def login():
     if not user:
         return jsonify({"error": "Credenciales incorrectas"}), 401
 
+    _reclamar_invitado(db, data.get("guest_id"), str(user["_id"]))
     token = create_access_token(identity=str(user["_id"]))
     return jsonify({
         "message" : "Sesión iniciada",

@@ -45,7 +45,7 @@ async function doLogin() {
     errBox.style.display = 'none';
     if (!email || !password) { errBox.textContent='Completa todos los campos.'; errBox.style.display='block'; return; }
     try {
-        const res  = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password}) });
+        const res  = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password,guest_id:getGuestId()}) });
         const data = await res.json();
         if (!res.ok) { errBox.textContent=data.error||'Error al iniciar sesión'; errBox.style.display='block'; return; }
         localStorage.setItem('token', data.token);
