@@ -750,62 +750,6 @@ button { cursor: pointer; border: none; font-family: var(--font-body); }
     color: #6b7280;
     margin: 2px 0 6px;
 }
-/* ── Banner superior de stats en vivo (página de producto) ──── */
-.live-stats-banner {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-    margin: 0 0 22px;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, var(--blue-soft), #fff);
-    border: 1px solid var(--blue-mid);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-}
-.lsb-stat {
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
-    padding-right: 14px;
-    border-right: 1px solid var(--border);
-}
-.lsb-stat:last-of-type { border-right: none; }
-.lsb-icon { font-size: 1.05rem; }
-.lsb-num {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.3rem;
-    color: var(--blue-dark);
-    font-variant-numeric: tabular-nums;
-    display: inline-block;
-}
-.lsb-label { font-size: .85rem; color: var(--gray); font-weight: 600; }
-.lsb-live {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-left: auto;
-    font-size: .8rem;
-    font-weight: 700;
-    color: #d12d2d;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-}
-/* Pulso cuando un número cambia en vivo */
-.lsb-bump { animation: lsbBump .5s ease; }
-@keyframes lsbBump {
-    0%   { transform: scale(1);    color: var(--blue-dark); }
-    35%  { transform: scale(1.28); color: var(--green); }
-    100% { transform: scale(1);    color: var(--blue-dark); }
-}
-@media (max-width: 600px) {
-    .live-stats-banner { gap: 10px; padding: 12px 14px; }
-    .lsb-num { font-size: 1.1rem; }
-    .lsb-stat { padding-right: 10px; }
-    .lsb-live { width: 100%; margin-left: 0; justify-content: flex-start; }
-}
-
 .live-badge {
     position: absolute;
     top: 10px;

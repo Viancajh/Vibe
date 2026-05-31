@@ -2,25 +2,6 @@
 {% block title %}Producto — Vibe{% endblock %}
 {% block content %}
 
-<div class="live-stats-banner" id="liveStatsBanner" style="display:none">
-    <div class="lsb-stat">
-        <span class="lsb-icon">📦</span>
-        <span class="lsb-num" id="bannerStock">—</span>
-        <span class="lsb-label">en stock</span>
-    </div>
-    <div class="lsb-stat">
-        <span class="lsb-icon">👁️</span>
-        <span class="lsb-num" id="bannerViews">—</span>
-        <span class="lsb-label">vistas</span>
-    </div>
-    <div class="lsb-stat">
-        <span class="lsb-icon">🛒</span>
-        <span class="lsb-num" id="bannerSold">—</span>
-        <span class="lsb-label">vendidos</span>
-    </div>
-    <div class="lsb-live"><span class="live-dot"></span> En vivo</div>
-</div>
-
 <div class="product-detail-wrap" id="productDetail">
     <div class="loading-spinner">Cargando producto…</div>
 </div>
@@ -59,31 +40,8 @@ function connectRealtime() {
     // Si se cae la conexión, EventSource reintenta solo automáticamente.
 }
 
-// Actualiza un número del banner y le da un "pulso" si cambió de valor.
-function setBannerStat(id, value) {
-    const el = document.getElementById(id);
-    if (!el || value === undefined) return;
-    const next = String(value);
-    if (el.textContent !== next) {
-        el.textContent = next;
-        el.classList.remove('lsb-bump');
-        void el.offsetWidth;            // reinicia la animación
-        el.classList.add('lsb-bump');
-    }
-}
-
-// Refresca el banner superior con los 3 datos en vivo.
-function updateBanner(s) {
-    const banner = document.getElementById('liveStatsBanner');
-    if (banner) banner.style.display = 'flex';
-    if (s.stock !== undefined)     setBannerStat('bannerStock', s.stock);
-    if (s.views !== undefined)     setBannerStat('bannerViews', s.views);
-    if (s.purchases !== undefined) setBannerStat('bannerSold',  s.purchases);
-}
-
 function applyRealtime(s) {
     if (s.product_id && s.product_id !== PRODUCT_ID) return;
-    updateBanner(s);
     const stockEl = document.getElementById('metaStock');
     const viewsEl = document.getElementById('metaViews');
     const purchEl = document.getElementById('metaPurchases');
@@ -151,7 +109,6 @@ async function loadProduct() {
             </div>`;
 
         document.title = `${product.name} — Vibe`;
-        updateBanner(product);   // valores iniciales del banner superior
         if (getToken()) {
             document.getElementById('popularityBar').style.display = 'flex';
             loadPopularity();
