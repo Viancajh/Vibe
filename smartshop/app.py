@@ -18,6 +18,7 @@ from routes.recommendations import recommendations_bp
 from routes.dataset           import dataset_bp
 from routes.ml_lab            import ml_lab_bp
 from routes.account           import account_bp
+from routes.stream            import stream_bp
 
 # ── Crear app ─────────────────────────────────────────────────
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -36,6 +37,7 @@ app.register_blueprint(recommendations_bp)
 app.register_blueprint(dataset_bp)
 app.register_blueprint(ml_lab_bp)
 app.register_blueprint(account_bp)
+app.register_blueprint(stream_bp)
 
 # ── Rutas de páginas HTML ─────────────────────────────────────
 @app.route("/")
@@ -99,4 +101,6 @@ def metodos_pago():
 if __name__ == "__main__":
     init_db()
     print(" Vibe corriendo en http://localhost:5000")
-    app.run(debug=Config.DEBUG, port=5000)
+    # threaded=True es necesario para SSE: cada cliente mantiene una
+    # conexión abierta y no debe bloquear al resto de peticiones.
+    app.run(debug=Config.DEBUG, port=5000, threaded=True)

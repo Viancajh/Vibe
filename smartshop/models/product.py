@@ -64,3 +64,19 @@ def get_popular_products(db, limit: int = 16) -> list:
     """Retorna los productos más vistos."""
     products = list(db.products.find().sort("views", -1).limit(limit))
     return [serialize_product(p) for p in products]
+
+
+def buy_product(db, product_id: str, quantity: int = 1) -> bool:
+    """Registra una compra: descuenta stock e incrementa vendidos.
+
+    Operación atómica: solo procede si hay stock suficiente.
+    Devuelve True si se concretó, False si no había stock.
+    """
+    try:
+        result = db.products.update_one(
+            {"_id": ObjectId(product_id), "stock": {"$gte": quantity}},
+            {"$inc": {"stock": -quantity, "purchases": quantity}},
+        )
+        return result.modified_count == 1
+    except Exception:
+        return False

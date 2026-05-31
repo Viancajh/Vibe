@@ -2,6 +2,25 @@
 {% block title %}Producto — Vibe{% endblock %}
 {% block content %}
 
+<div class="live-stats-banner" id="liveStatsBanner" style="display:none">
+    <div class="lsb-stat">
+        <span class="lsb-icon">📦</span>
+        <span class="lsb-num" id="bannerStock">—</span>
+        <span class="lsb-label">en stock</span>
+    </div>
+    <div class="lsb-stat">
+        <span class="lsb-icon">👁️</span>
+        <span class="lsb-num" id="bannerViews">—</span>
+        <span class="lsb-label">vistas</span>
+    </div>
+    <div class="lsb-stat">
+        <span class="lsb-icon">🛒</span>
+        <span class="lsb-num" id="bannerSold">—</span>
+        <span class="lsb-label">vendidos</span>
+    </div>
+    <div class="lsb-live"><span class="live-dot"></span> En vivo</div>
+</div>
+
 <div class="product-detail-wrap" id="productDetail">
     <div class="loading-spinner">Cargando producto…</div>
 </div>
@@ -23,7 +42,72 @@ let product       = null;
 document.addEventListener('DOMContentLoaded', async () => {
     await loadProduct();
     loadRelated();
+    connectRealtime();
 });
+
+// ── Tiempo real (SSE) ─────────────────────────────────────────
+let evtSource = null;
+
+function connectRealtime() {
+    if (evtSource) evtSource.close();
+    evtSource = new EventSource(`/api/stream/product/${PRODUCT_ID}`);
+    evtSource.addEventListener('update', (e) => {
+        try { applyRealtime(JSON.parse(e.data)); } catch (_) {}
+    });
+    // Si se cae la conexión, EventSource reintenta solo automáticamente.
+}
+
+// Actualiza un número del banner y le da un "pulso" si cambió de valor.
+function setBannerStat(id, value) {
+    const el = document.getElementById(id);
+    if (!el || value === undefined) return;
+    const next = String(value);
+    if (el.textContent !== next) {
+        el.textContent = next;
+        el.classList.remove('lsb-bump');
+        void el.offsetWidth;            // reinicia la animación
+        el.classList.add('lsb-bump');
+    }
+}
+
+// Refresca el banner superior con los 3 datos en vivo.
+function updateBanner(s) {
+    const banner = document.getElementById('liveStatsBanner');
+    if (banner) banner.style.display = 'flex';
+    if (s.stock !== undefined)     setBannerStat('bannerStock', s.stock);
+    if (s.views !== undefined)     setBannerStat('bannerViews', s.views);
+    if (s.purchases !== undefined) setBannerStat('bannerSold',  s.purchases);
+}
+
+function applyRealtime(s) {
+    if (s.product_id && s.product_id !== PRODUCT_ID) return;
+    updateBanner(s);
+    const stockEl = document.getElementById('metaStock');
+    const viewsEl = document.getElementById('metaViews');
+    const purchEl = document.getElementById('metaPurchases');
+    if (stockEl && s.stock !== undefined) {
+        stockEl.textContent = s.stock > 0 ? `📦 ${s.stock} en stock` : '⛔ Agotado';
+    }
+    if (viewsEl && s.views !== undefined)     viewsEl.textContent = `👁️ ${s.views} vistas`;
+    if (purchEl && s.purchases !== undefined) purchEl.textContent = `🛒 ${s.purchases} vendidos`;
+
+    const box  = document.getElementById('liveViewers');
+    const text = document.getElementById('liveViewersText');
+    if (box && text && s.viewers !== undefined) {
+        if (s.viewers > 1) {
+            text.textContent = `${s.viewers} personas viendo esto ahora`;
+            box.style.display = 'flex';
+        } else if (s.viewers === 1) {
+            text.textContent = 'Tú estás viendo esto ahora';
+            box.style.display = 'flex';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+    if (product && s.stock !== undefined) product.stock = s.stock;
+}
+
+window.addEventListener('beforeunload', () => { if (evtSource) evtSource.close(); });
 
 async function loadProduct() {
     const wrap = document.getElementById('productDetail');
@@ -44,9 +128,12 @@ async function loadProduct() {
                     <div class="detail-rating">${stars} <span style="color:var(--gray);font-size:.9rem">${product.rating} / 5 estrellas</span></div>
                     <p class="detail-desc">${product.description}</p>
                     <div class="detail-meta">
-                        <span>📦 ${product.stock} en stock</span>
-                        <span>👁️ ${product.views} vistas</span>
-                        <span>🛒 ${product.purchases} vendidos</span>
+                        <span id="metaStock">📦 ${product.stock} en stock</span>
+                        <span id="metaViews">👁️ ${product.views} vistas</span>
+                        <span id="metaPurchases">🛒 ${product.purchases} vendidos</span>
+                    </div>
+                    <div id="liveViewers" class="live-viewers" style="display:none">
+                        <span class="live-dot"></span> <span id="liveViewersText"></span>
                     </div>
                     <div class="detail-price">$${product.price.toFixed(2)}</div>
                     <div id="popularityBar" class="ml-prediction" style="display:none">
@@ -62,6 +149,7 @@ async function loadProduct() {
             </div>`;
 
         document.title = `${product.name} — Vibe`;
+        updateBanner(product);   // valores iniciales del banner superior
         if (getToken()) {
             document.getElementById('popularityBar').style.display = 'flex';
             loadPopularity();

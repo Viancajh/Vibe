@@ -204,9 +204,11 @@ function renderCard(p) {
             <img src="${escapeHtml(p.image)}" alt="${name}" loading="lazy" onerror="this.src='/static/images/placeholder.svg'">
             <span class="product-cat-badge">${escapeHtml(p.category)}</span>
         </div>
+        <span class="live-badge" data-viewers-for="${p._id}" style="display:none"></span>
         <div class="product-info">
             <h3 class="product-name">${name}</h3>
             <div class="product-rating">${stars} <small>(${p.rating})</small></div>
+            <div class="product-sold" data-sold-for="${p._id}">🛒 ${p.purchases || 0} vendidos</div>
             <div class="product-footer">
                 <span class="product-price">${formatMoney(p.price)}</span>
                 <button class="btn-cart-small" data-id="${p._id}" data-name="${name}"
@@ -215,6 +217,35 @@ function renderCard(p) {
         </div>
     </div>`;
 }
+
+// ── Tiempo real global (SSE) ──────────────────────────────────
+let globalSource = null;
+
+function connectGlobalRealtime() {
+    if (globalSource) globalSource.close();
+    globalSource = new EventSource('/api/stream/global');
+    globalSource.addEventListener('update', (e) => {
+        try { applyGlobalUpdate(JSON.parse(e.data)); } catch (_) {}
+    });
+}
+
+function applyGlobalUpdate(s) {
+    if (!s.product_id) return;
+    document.querySelectorAll(`[data-sold-for="${s.product_id}"]`).forEach(el => {
+        if (s.purchases !== undefined) el.textContent = `🛒 ${s.purchases} vendidos`;
+    });
+    document.querySelectorAll(`[data-viewers-for="${s.product_id}"]`).forEach(el => {
+        if (s.viewers > 0) {
+            el.textContent = `🔴 ${s.viewers} viendo`;
+            el.style.display = 'inline-flex';
+        } else {
+            el.style.display = 'none';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', connectGlobalRealtime);
+window.addEventListener('beforeunload', () => { if (globalSource) globalSource.close(); });
 
 function renderCardSmall(p) {
     const name = escapeHtml(p.name);

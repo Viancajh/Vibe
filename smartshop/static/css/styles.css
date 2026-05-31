@@ -238,6 +238,7 @@ button { cursor: pointer; border: none; font-family: var(--font-body); }
 .products-row { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; }
 
 .product-card {
+    position: relative;
     background: var(--white); border-radius: var(--radius);
     overflow: hidden; cursor: pointer;
     box-shadow: var(--shadow); border: 1.5px solid var(--border);
@@ -714,4 +715,110 @@ button { cursor: pointer; border: none; font-family: var(--font-body); }
     .main-content { padding: 20px 16px 52px; }
     .auth-card { padding: 28px 20px; }
     .skeleton-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Indicadores en tiempo real (SSE) ───────────────────────── */
+.live-viewers {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 7px 12px;
+    background: #fff1f1;
+    border: 1px solid #ffd5d5;
+    border-radius: 8px;
+    color: #d12d2d;
+    font-size: .9rem;
+    font-weight: 600;
+    width: fit-content;
+}
+.live-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #ff3b3b;
+    box-shadow: 0 0 0 0 rgba(255, 59, 59, .6);
+    animation: livePulse 1.4s infinite;
+}
+@keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255, 59, 59, .6); }
+    70%  { box-shadow: 0 0 0 8px rgba(255, 59, 59, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0); }
+}
+.product-sold {
+    font-size: .82rem;
+    color: #6b7280;
+    margin: 2px 0 6px;
+}
+/* ── Banner superior de stats en vivo (página de producto) ──── */
+.live-stats-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 0 0 22px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, var(--blue-soft), #fff);
+    border: 1px solid var(--blue-mid);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+.lsb-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    padding-right: 14px;
+    border-right: 1px solid var(--border);
+}
+.lsb-stat:last-of-type { border-right: none; }
+.lsb-icon { font-size: 1.05rem; }
+.lsb-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--blue-dark);
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+}
+.lsb-label { font-size: .85rem; color: var(--gray); font-weight: 600; }
+.lsb-live {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+    font-size: .8rem;
+    font-weight: 700;
+    color: #d12d2d;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+/* Pulso cuando un número cambia en vivo */
+.lsb-bump { animation: lsbBump .5s ease; }
+@keyframes lsbBump {
+    0%   { transform: scale(1);    color: var(--blue-dark); }
+    35%  { transform: scale(1.28); color: var(--green); }
+    100% { transform: scale(1);    color: var(--blue-dark); }
+}
+@media (max-width: 600px) {
+    .live-stats-banner { gap: 10px; padding: 12px 14px; }
+    .lsb-num { font-size: 1.1rem; }
+    .lsb-stat { padding-right: 10px; }
+    .lsb-live { width: 100%; margin-left: 0; justify-content: flex-start; }
+}
+
+.live-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    background: rgba(255, 59, 59, .95);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
+    animation: livePulse 1.4s infinite;
 }

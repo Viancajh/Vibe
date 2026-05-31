@@ -7,6 +7,7 @@ from database.mongodb import get_db
 from models.product import (get_all_products, get_product_by_id,
                              search_products, increment_views, get_popular_products)
 from models.interaction import log_interaction
+from realtime import publish_product
 
 products_bp = Blueprint("products", __name__, url_prefix="/api/products")
 
@@ -55,8 +56,9 @@ def product_detail(product_id):
     if not product:
         return jsonify({"error": "Producto no encontrado"}), 404
 
-    # Incrementar vistas siempre
+    # Incrementar vistas siempre y difundir el nuevo conteo en tiempo real
     increment_views(db, product_id)
+    publish_product(db, product_id)
 
     # Registrar interacción si hay sesión activa
     try:

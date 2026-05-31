@@ -126,7 +126,7 @@ def export_products(db, path: str | None = None) -> tuple[str, int]:
 
 
 def export_all(db=None):
-    db = db or init_db()
+    db = db if db is not None else init_db()
     paths = []
     for name, fn in [
         ("interacciones", export_interactions),

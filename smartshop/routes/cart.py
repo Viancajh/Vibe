@@ -5,9 +5,10 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from bson import ObjectId
 from database.mongodb import get_db
-from models.product import get_product_by_id
+from models.product import get_product_by_id, buy_product
 from models.interaction import log_interaction
 from routes.account import _generar_guia, _pasos_seguimiento
+from realtime import publish_product
 
 cart_bp = Blueprint("cart", __name__, url_prefix="/api/cart")
 
@@ -124,19 +125,50 @@ def checkout():
     if not shipping.get("name") or not shipping.get("address") or not shipping.get("city"):
         return jsonify({"error": "Completa los datos de envío"}), 400
 
+    # Validar stock disponible ANTES de cobrar
+    sin_stock = []
+    for item in items:
+        product = get_product_by_id(db, item["product_id"])
+        disponible = product.get("stock", 0) if product else 0
+        if disponible < item["quantity"]:
+            sin_stock.append({
+                "product_id": item["product_id"],
+                "name": item.get("name", ""),
+                "disponible": disponible,
+                "solicitado": item["quantity"],
+            })
+    if sin_stock:
+        return jsonify({
+            "error": "Stock insuficiente para algunos productos",
+            "items": sin_stock,
+        }), 409
+
     subtotal = sum(i["price"] * i["quantity"] for i in items)
     shipping_cost = _calcular_envio(subtotal)
     total = subtotal + shipping_cost
 
-    # Registrar compra e incrementar contador de productos
+    # Registrar compra: descuenta stock + incrementa vendidos (atómico)
+    comprados = []
     for item in items:
         product = get_product_by_id(db, item["product_id"])
         category = product.get("category", "") if product else ""
+        ok = buy_product(db, item["product_id"], item["quantity"])
+        if not ok:
+            # Otra compra simultánea agotó el stock: revertimos lo ya cobrado
+            for pid, qty in comprados:
+                buy_product(db, pid, -qty)
+                publish_product(db, pid)
+            return jsonify({
+                "error": "Stock insuficiente",
+                "items": [{
+                    "product_id": item["product_id"],
+                    "name": item.get("name", ""),
+                }],
+            }), 409
+        comprados.append((item["product_id"], item["quantity"]))
         log_interaction(db, user_id, item["product_id"], "purchase", category)
-        db.products.update_one(
-            {"_id": ObjectId(item["product_id"])},
-            {"$inc": {"purchases": item["quantity"]}}
-        )
+        # Difundir nuevo stock y vendidos en tiempo real a todos
+        publish_product(db, item["product_id"])
 
     from datetime import datetime
     tracking_number = _generar_guia()
