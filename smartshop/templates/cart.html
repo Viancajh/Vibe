@@ -29,8 +29,7 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    if (!requireLogin()) return;
-    loadCart();
+    loadCart();   // funciona como invitado o con sesión
 });
 
 function actualizarResumen(subtotal) {
@@ -57,10 +56,6 @@ async function loadCart() {
     const itemsDiv = document.getElementById('cartItems');
     try {
         const res  = await apiFetch('/api/cart/');
-        if (res.status === 401) {
-            location.href = '/login';
-            return;
-        }
         const cart = await res.json();
         const items = cart.items || [];
 

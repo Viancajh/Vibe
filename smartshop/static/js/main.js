@@ -66,10 +66,21 @@ function addToCartFromBtn(btn) {
 function getToken() {
     return localStorage.getItem('token');
 }
+// Id de invitado: permite tener carrito sin iniciar sesión. Se genera una vez
+// por navegador y se manda en cada petición; el backend lo usa si no hay login.
+function getGuestId() {
+    let id = localStorage.getItem('guest_id');
+    if (!id) {
+        id = 'guest-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('guest_id', id);
+    }
+    return id;
+}
 async function apiFetch(url, options = {}) {
     const token = getToken();
     const headers = {
         'Content-Type': 'application/json',
+        'X-Guest-Id': getGuestId(),
         ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         ...(options.headers || {})
     };
@@ -130,7 +141,7 @@ function logout() {
 
 async function updateCartBadge() {
     const badge = document.getElementById('cartBadge');
-    if (!badge || !getToken()) return;
+    if (!badge) return;
 
     try {
         const res  = await apiFetch('/api/cart/');
@@ -144,11 +155,7 @@ async function updateCartBadge() {
 }
 
 async function addToCart(productId, productName) {
-    if (!getToken()) {
-        showToast('Inicia sesión para agregar al carrito');
-        setTimeout(() => location.href = '/login', 1200);
-        return;
-    }
+    // Ya no exige login: funciona como invitado (X-Guest-Id) o con sesión.
     try {
         const res  = await apiFetch('/api/cart/add', {
             method : 'POST',
@@ -158,11 +165,6 @@ async function addToCart(productId, productName) {
         if (res.ok) {
             showToast(`"${productName}" agregado al carrito`);
             updateCartBadge();
-        } else if (res.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            showToast('Sesión expirada. Inicia sesión de nuevo.');
-            setTimeout(() => location.href = '/login', 1200);
         } else {
             showToast(data.error || data.msg || 'Error al agregar al carrito');
         }

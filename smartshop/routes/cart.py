@@ -2,7 +2,7 @@
 #  routes/cart.py — Carrito de compras
 # =============================================================
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from bson import ObjectId
 from database.mongodb import get_db
 from models.product import get_product_by_id, buy_product
@@ -13,6 +13,20 @@ from realtime import publish_product
 cart_bp = Blueprint("cart", __name__, url_prefix="/api/cart")
 
 # ── Helpers ────────────────────────────────────────────────────
+
+def _identity():
+    """Identidad del carrito. Si hay sesión (JWT) usa el user_id; si no,
+    usa el id de invitado que manda el navegador en el header X-Guest-Id.
+    Devuelve (id, es_invitado). Permite carrito sin necesidad de login."""
+    user_id = None
+    try:
+        verify_jwt_in_request(optional=True)
+        user_id = get_jwt_identity()
+    except Exception:
+        user_id = None
+    if user_id:
+        return user_id, False
+    return request.headers.get("X-Guest-Id"), True
 
 def _get_or_create_cart(db, user_id: str) -> dict:
     cart = db.carts.find_one({"user_id": user_id})
@@ -33,20 +47,22 @@ def _serialize_cart(cart: dict) -> dict:
 # ── Rutas ──────────────────────────────────────────────────────
 
 @cart_bp.route("/", methods=["GET"])
-@jwt_required()
 def get_cart():
-    """GET /api/cart/ — Retorna el carrito del usuario."""
-    user_id = get_jwt_identity()
+    """GET /api/cart/ — Retorna el carrito del usuario o invitado."""
+    user_id, _ = _identity()
+    if not user_id:
+        return jsonify({"error": "Falta identificador de sesión"}), 400
     db = get_db()
     cart = _get_or_create_cart(db, user_id)
     return jsonify(_serialize_cart(cart)), 200
 
 
 @cart_bp.route("/add", methods=["POST"])
-@jwt_required()
 def add_to_cart():
-    """POST /api/cart/add — Agrega un producto al carrito."""
-    user_id = get_jwt_identity()
+    """POST /api/cart/add — Agrega un producto al carrito (con o sin login)."""
+    user_id, _ = _identity()
+    if not user_id:
+        return jsonify({"error": "Falta identificador de sesión"}), 400
     data = request.json or {}
     product_id = data.get("product_id")
     quantity   = int(data.get("quantity", 1))
@@ -85,10 +101,11 @@ def add_to_cart():
 
 
 @cart_bp.route("/remove/<product_id>", methods=["DELETE"])
-@jwt_required()
 def remove_from_cart(product_id):
     """DELETE /api/cart/remove/<id> — Elimina un producto del carrito."""
-    user_id = get_jwt_identity()
+    user_id, _ = _identity()
+    if not user_id:
+        return jsonify({"error": "Falta identificador de sesión"}), 400
     db = get_db()
     cart = _get_or_create_cart(db, user_id)
     items = [i for i in cart.get("items", []) if i["product_id"] != product_id]
@@ -106,10 +123,11 @@ def _calcular_envio(subtotal: float) -> float:
 
 
 @cart_bp.route("/checkout", methods=["POST"])
-@jwt_required()
 def checkout():
     """POST /api/cart/checkout — Simula la compra y vacía el carrito."""
-    user_id = get_jwt_identity()
+    user_id, is_guest = _identity()
+    if not user_id:
+        return jsonify({"error": "Falta identificador de sesión"}), 400
     data = request.json or {}
     db = get_db()
     cart = _get_or_create_cart(db, user_id)
@@ -178,7 +196,7 @@ def checkout():
 
     # Guardar tarjeta si el usuario lo pidió (solo últimos 4 dígitos)
     card_info = data.get("card") or {}
-    if payment_method == "tarjeta" and card_info.get("save") and card_info.get("number"):
+    if not is_guest and payment_method == "tarjeta" and card_info.get("save") and card_info.get("number"):
         num = card_info["number"].replace(" ", "")
         if len(num) >= 4:
             import uuid

@@ -23,8 +23,7 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    if (!requireLogin()) return;
-    loadCheckout();
+    loadCheckout();   // funciona como invitado o con sesión
 });
 
 let cartItems = [];
