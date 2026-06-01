@@ -1,25 +1,61 @@
 product_id,name,category,price,stock,rating,views,purchases
-6a18c45bacd7a9ee0ab471e4,Laptop ProBook 15,Tecnología,1699.99,15,4.5,320,45
-6a18c45bacd7a9ee0ab471e5,Auriculares Bluetooth X3,Tecnología,899.99,30,4.3,215,67
-6a18c45bacd7a9ee0ab471e6,Smartphone Galaxy Z9,Tecnología,7999.99,20,4.7,480,89
-6a18c45bacd7a9ee0ab471e7,Tablet StudyPad 10,Tecnología,9999.99,12,4.1,178,34
-6a18c45bacd7a9ee0ab471e8,Smartwatch FitPro 4,Tecnología,3999.99,25,4.4,290,58
-6a18c45bacd7a9ee0ab471e9,Monitor UltraWide 34,Tecnología,899.99,8,4.6,156,22
-6a18c45bacd7a9ee0ab471ea,Teclado Mecánico RGB,Tecnología,799.99,40,4.2,201,41
-6a18c45bacd7a9ee0ab471eb,Cámara Digital Mirrorless,Tecnología,2399.99,6,4.8,134,18
-6a18c45bacd7a9ee0ab471ec,Control Inalámbrico Pro,Gaming,69.99,35,4.5,410,95
-6a18c45bacd7a9ee0ab471ed,Silla Gamer ErgoMax,Gaming,7999.99,10,4.3,267,31
-6a18c45bacd7a9ee0ab471ee,Headset Gaming Surround,Gaming,999.99,22,4.1,189,44
-6a18c45bacd7a9ee0ab471ef,Mouse Gaming 16000 DPI,Gaming,1099.99,50,4.4,335,78
-6a18c45bacd7a9ee0ab471f0,Consola PortaGame X,Gaming,12999.99,18,4.9,520,102
-6a18c45bacd7a9ee0ab471f1,Alfombrilla Gaming XL,Gaming,399.99,60,4.0,145,55
-6a18c45bacd7a9ee0ab471f2,Hoodie Oversized Urban,Ropa,499.99,80,4.2,230,87
-6a18c45bacd7a9ee0ab471f3,Zapatillas RunFast Pro,Ropa,899.99,45,4.6,398,113
-6a18c45bacd7a9ee0ab471f4,Jeans Slim Fit Classic,Ropa,799.99,70,4.1,175,62
-6a18c45bacd7a9ee0ab471f5,Chaqueta Impermeable,Ropa,1099.99,30,4.3,142,38
-6a18c45bacd7a9ee0ab471f6,Camiseta Dry-Fit Sport,Ropa,699.99,100,4.0,198,91
-6a18c45bacd7a9ee0ab471f7,Cafetera Espresso Auto,Hogar,9999.99,15,4.7,310,49
-6a18c45bacd7a9ee0ab471f8,Foco LED Inteligente,Hogar,399.99,55,4.2,164,72
-6a18c45bacd7a9ee0ab471f9,Robot Aspirador Smart,Hogar,1499.99,12,4.5,287,35
-6a18c45bacd7a9ee0ab471fa,Set Utensilios Cocina,Hogar,699.99,28,4.1,121,43
-6a18c45bacd7a9ee0ab471fb,Cojines Decorativos Pack,Hogar,499.99,40,3.9,89,27
+6a1c81d0cfca4300ebcbb2fe,iPhone 15 Pro 256GB,Tecnología,24999.99,48,4.8,1385,100
+6a1c81d0cfca4300ebcbb2ff,Samsung Galaxy S24 Ultra,Tecnología,27999.99,38,4.9,1551,114
+6a1c81d0cfca4300ebcbb300,Xiaomi Redmi Note 13 Pro,Tecnología,6499.99,98,4.5,463,26
+6a1c81d0cfca4300ebcbb301,Motorola Edge 40 Neo,Tecnología,5999.99,101,4.3,431,24
+6a1c81d0cfca4300ebcbb302,Google Pixel 8,Tecnología,15999.99,75,4.6,931,61
+6a1c81d0cfca4300ebcbb303,OPPO Reno 11 5G,Tecnología,8999.99,94,4.4,582,34
+6a1c81d0cfca4300ebcbb304,Realme 12 Pro+ 5G,Tecnología,7499.99,95,4.2,493,29
+6a1c81d0cfca4300ebcbb305,Huawei Nova 12 SE,Tecnología,6999.99,99,4.1,473,29
+6a1c81d0cfca4300ebcbb306,Laptop ProBook 15,Tecnología,16999.99,69,4.5,1000,68
+6a1c81d0cfca4300ebcbb307,Auriculares Bluetooth X3,Tecnología,1899.99,115,4.3,211,7
+6a1c81d0cfca4300ebcbb308,Tablet StudyPad 10,Tecnología,4999.99,102,4.1,385,22
+6a1c81d0cfca4300ebcbb309,Smartwatch FitPro 4,Tecnología,2999.99,114,4.4,287,13
+6a1c81d0cfca4300ebcbb30a,Monitor UltraWide 34,Tecnología,8999.99,95,4.6,604,38
+6a1c81d0cfca4300ebcbb30b,Teclado Mecánico RGB,Tecnología,1799.99,114,4.2,198,5
+6a1c81d0cfca4300ebcbb30c,Cámara Digital Mirrorless,Tecnología,18999.99,65,4.8,1083,77
+6a1c81d0cfca4300ebcbb30d,Control Inalámbrico Pro,Gaming,1299.99,119,4.5,213,4
+6a1c81d0cfca4300ebcbb30e,Silla Gamer ErgoMax,Gaming,5499.99,106,4.3,420,22
+6a1c81d0cfca4300ebcbb30f,Headset Gaming Surround 7.1,Gaming,1499.99,112,4.1,188,4
+6a1c81d0cfca4300ebcbb310,Mouse Gaming 16000 DPI,Gaming,899.99,114,4.4,184,2
+6a1c81d0cfca4300ebcbb311,Consola PortaGame X,Gaming,8999.99,95,4.9,582,33
+6a1c81d0cfca4300ebcbb312,Alfombrilla Gaming XL,Gaming,399.99,123,4.0,132,1
+6a1c81d0cfca4300ebcbb313,Teclado Gaming 60%,Gaming,1699.99,111,4.5,216,9
+6a1c81d0cfca4300ebcbb314,Webcam Streaming 4K,Gaming,2199.99,116,4.3,229,5
+6a1c81d0cfca4300ebcbb315,Volante Racing Pro,Gaming,4599.99,107,4.6,359,18
+6a1c81d0cfca4300ebcbb316,Micrófono Condenser RGB,Gaming,1899.99,117,4.4,208,8
+6a1c81d0cfca4300ebcbb317,Soporte Monitor Dual,Gaming,1299.99,114,4.2,173,7
+6a1c81d0cfca4300ebcbb318,Lentes VR Quest 3,Gaming,9999.99,94,4.7,632,37
+6a1c81d0cfca4300ebcbb319,Kit Luces LED RGB,Gaming,599.99,122,4.0,165,3
+6a1c81d0cfca4300ebcbb31a,Mando Arcade Fight Stick,Gaming,2499.99,115,4.5,255,12
+6a1c81d0cfca4300ebcbb31b,Escritorio Gaming Ajustable,Gaming,6999.99,99,4.4,471,28
+6a1c81d0cfca4300ebcbb31c,Hoodie Oversized Urban,Ropa,699.99,118,4.2,145,3
+6a1c81d0cfca4300ebcbb31d,Zapatillas RunFast Pro,Ropa,1499.99,115,4.6,224,6
+6a1c81d0cfca4300ebcbb31e,Jeans Slim Fit Classic,Ropa,899.99,120,4.1,151,4
+6a1c81d0cfca4300ebcbb31f,Chaqueta Impermeable,Ropa,1299.99,118,4.3,186,7
+6a1c81d0cfca4300ebcbb320,Camiseta Dry-Fit Sport,Ropa,449.99,123,4.0,154,3
+6a1c81d0cfca4300ebcbb321,Sudadera Zip-Up Premium,Ropa,799.99,114,4.3,157,0
+6a1c81d0cfca4300ebcbb322,Pantalón Cargo Street,Ropa,749.99,121,4.1,151,2
+6a1c81d0cfca4300ebcbb323,Vestido Casual Midi,Ropa,899.99,119,4.4,159,3
+6a1c81d0cfca4300ebcbb324,Gorra Snapback Vibe,Ropa,349.99,118,4.0,122,1
+6a1c81d0cfca4300ebcbb325,Mochila Urbana 25L,Ropa,999.99,119,4.5,174,2
+6a1c81d0cfca4300ebcbb326,Sandalias Slide Comfort,Ropa,499.99,117,4.2,136,1
+6a1c81d0cfca4300ebcbb327,Blazer Slim Fit,Ropa,1599.99,119,4.3,201,7
+6a1c81d0cfca4300ebcbb328,Leggings Yoga Pro,Ropa,549.99,121,4.6,146,3
+6a1c81d0cfca4300ebcbb329,Playera Polo Clásica,Ropa,599.99,119,4.1,135,4
+6a1c81d0cfca4300ebcbb32a,Botas Chelsea Cuero,Ropa,1899.99,115,4.5,220,6
+6a1c81d0cfca4300ebcbb32b,Cafetera Espresso Auto,Hogar,4999.99,106,4.7,399,22
+6a1c81d0cfca4300ebcbb32c,Foco LED Inteligente,Hogar,299.99,118,4.2,142,0
+6a1c81d0cfca4300ebcbb32d,Robot Aspirador Smart,Hogar,6499.99,104,4.5,440,28
+6a1c81d0cfca4300ebcbb32e,Set Utensilios Cocina 20pz,Hogar,899.99,121,4.1,184,2
+6a1c81d0cfca4300ebcbb32f,Cojines Decorativos Pack x3,Hogar,599.99,121,3.9,157,1
+6a1c81d0cfca4300ebcbb330,Lámpara de Mesa Minimal,Hogar,449.99,116,4.3,137,1
+6a1c81d0cfca4300ebcbb331,Organizador de Closet,Hogar,799.99,120,4.0,172,4
+6a1c81d0cfca4300ebcbb332,Ventilador Torre Silencioso,Hogar,1299.99,118,4.2,181,2
+6a1c81d0cfca4300ebcbb333,Juego de Sábanas Queen,Hogar,699.99,122,4.4,166,4
+6a1c81d0cfca4300ebcbb334,Purificador de Aire HEPA,Hogar,3499.99,113,4.6,306,13
+6a1c81d0cfca4300ebcbb335,Batería de Cocina Antiadherente,Hogar,1899.99,111,4.5,214,5
+6a1c81d0cfca4300ebcbb336,Espejo Decorativo Redondo,Hogar,999.99,119,4.3,161,3
+6a1c81d0cfca4300ebcbb337,Maceta Cerámica Set x3,Hogar,399.99,120,4.1,144,0
+6a1c81d0cfca4300ebcbb338,Freidora de Aire 5.5L,Hogar,2199.99,110,4.7,261,9
+6a1c81d0cfca4300ebcbb339,Reloj de Pared Moderno,Hogar,349.99,113,4.0,135,2

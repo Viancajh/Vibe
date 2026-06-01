@@ -2,67 +2,67 @@
   "normalidad": {
     "variable": "rating",
     "test": "Shapiro-Wilk",
-    "estadistico": 0.9569,
-    "p_valor": 0.0469,
+    "estadistico": 0.9634,
+    "p_valor": 0.0,
     "interpretacion": "No se cumple normalidad (p<=0.05)"
   },
   "descriptivos": {
     "n_views": {
-      "count": 55.0,
-      "mean": 1.0,
-      "std": 0.0,
-      "min": 1.0,
-      "25%": 1.0,
-      "50%": 1.0,
-      "75%": 1.0,
-      "max": 1.0
+      "count": 816.0,
+      "mean": 3.27,
+      "std": 1.968,
+      "min": 0.0,
+      "25%": 2.0,
+      "50%": 3.0,
+      "75%": 5.0,
+      "max": 6.0
     },
     "n_clicks": {
-      "count": 55.0,
-      "mean": 0.564,
-      "std": 0.501,
+      "count": 816.0,
+      "mean": 2.115,
+      "std": 1.256,
       "min": 0.0,
-      "25%": 0.0,
-      "50%": 1.0,
-      "75%": 1.0,
-      "max": 1.0
+      "25%": 1.0,
+      "50%": 2.0,
+      "75%": 3.0,
+      "max": 4.0
     },
     "n_cart": {
-      "count": 55.0,
-      "mean": 0.218,
-      "std": 0.417,
+      "count": 816.0,
+      "mean": 0.463,
+      "std": 0.506,
       "min": 0.0,
       "25%": 0.0,
       "50%": 0.0,
-      "75%": 0.0,
-      "max": 1.0
+      "75%": 1.0,
+      "max": 3.0
     },
     "avg_duration": {
-      "count": 55.0,
-      "mean": 49.691,
-      "std": 34.445,
-      "min": 5.0,
-      "25%": 21.0,
-      "50%": 44.0,
-      "75%": 77.5,
-      "max": 115.0
+      "count": 816.0,
+      "mean": 99.951,
+      "std": 49.789,
+      "min": 0.0,
+      "25%": 82.938,
+      "50%": 114.333,
+      "75%": 133.875,
+      "max": 189.5
     },
     "price_norm": {
-      "count": 55.0,
-      "mean": 2.91,
-      "std": 3.462,
-      "min": 0.07,
-      "25%": 0.75,
-      "50%": 1.1,
-      "75%": 4.0,
-      "max": 13.0
+      "count": 816.0,
+      "mean": 4.053,
+      "std": 5.654,
+      "min": 0.3,
+      "25%": 0.8,
+      "50%": 1.6,
+      "75%": 6.0,
+      "max": 28.0
     },
     "rating": {
-      "count": 55.0,
-      "mean": 4.347,
-      "std": 0.256,
+      "count": 816.0,
+      "mean": 4.351,
+      "std": 0.239,
       "min": 3.9,
-      "25%": 4.1,
+      "25%": 4.2,
       "50%": 4.3,
       "75%": 4.5,
       "max": 4.9
@@ -71,81 +71,81 @@
   "outliers": {
     "variable": "price_norm",
     "metodo": "IQR (1.5)",
-    "cantidad": 5,
-    "limite_inferior": -4.125,
-    "limite_superior": 8.875
+    "cantidad": 59,
+    "limite_inferior": -7.0,
+    "limite_superior": 13.8
   },
   "correlacion": {
     "n_views": {
-      "n_views": NaN,
-      "n_clicks": NaN,
-      "n_cart": NaN,
-      "avg_duration": NaN,
-      "price_norm": NaN,
-      "rating": NaN,
-      "purchased": NaN
+      "n_views": 1.0,
+      "n_clicks": 0.457,
+      "n_cart": 0.259,
+      "avg_duration": 0.667,
+      "price_norm": 0.011,
+      "rating": 0.005,
+      "purchased": 0.192
     },
     "n_clicks": {
-      "n_views": NaN,
+      "n_views": 0.457,
       "n_clicks": 1.0,
-      "n_cart": 0.199,
-      "avg_duration": 0.542,
-      "price_norm": 0.117,
-      "rating": 0.063,
-      "purchased": -0.06
+      "n_cart": 0.169,
+      "avg_duration": 0.456,
+      "price_norm": 0.019,
+      "rating": 0.009,
+      "purchased": 0.132
     },
     "n_cart": {
-      "n_views": NaN,
-      "n_clicks": 0.199,
+      "n_views": 0.259,
+      "n_clicks": 0.169,
       "n_cart": 1.0,
-      "avg_duration": 0.024,
-      "price_norm": 0.024,
-      "rating": -0.012,
-      "purchased": 0.093
+      "avg_duration": 0.274,
+      "price_norm": 0.039,
+      "rating": 0.037,
+      "purchased": 0.681
     },
     "avg_duration": {
-      "n_views": NaN,
-      "n_clicks": 0.542,
-      "n_cart": 0.024,
+      "n_views": 0.667,
+      "n_clicks": 0.456,
+      "n_cart": 0.274,
       "avg_duration": 1.0,
-      "price_norm": 0.103,
-      "rating": -0.003,
-      "purchased": 0.019
+      "price_norm": -0.008,
+      "rating": 0.035,
+      "purchased": 0.197
     },
     "price_norm": {
-      "n_views": NaN,
-      "n_clicks": 0.117,
-      "n_cart": 0.024,
-      "avg_duration": 0.103,
+      "n_views": 0.011,
+      "n_clicks": 0.019,
+      "n_cart": 0.039,
+      "avg_duration": -0.008,
       "price_norm": 1.0,
-      "rating": 0.33,
-      "purchased": -0.146
+      "rating": 0.615,
+      "purchased": 0.008
     },
     "rating": {
-      "n_views": NaN,
-      "n_clicks": 0.063,
-      "n_cart": -0.012,
-      "avg_duration": -0.003,
-      "price_norm": 0.33,
+      "n_views": 0.005,
+      "n_clicks": 0.009,
+      "n_cart": 0.037,
+      "avg_duration": 0.035,
+      "price_norm": 0.615,
       "rating": 1.0,
-      "purchased": -0.181
+      "purchased": 0.015
     },
     "purchased": {
-      "n_views": NaN,
-      "n_clicks": -0.06,
-      "n_cart": 0.093,
-      "avg_duration": 0.019,
-      "price_norm": -0.146,
-      "rating": -0.181,
+      "n_views": 0.192,
+      "n_clicks": 0.132,
+      "n_cart": 0.681,
+      "avg_duration": 0.197,
+      "price_norm": 0.008,
+      "rating": 0.015,
       "purchased": 1.0
     }
   },
   "anova": {
     "variable_entrada": "n_cart",
     "variable_objetivo": "purchased",
-    "f_estadistico": 0.4663,
-    "p_valor": 0.4977,
-    "interpretacion": "Sin diferencia significativa"
+    "f_estadistico": 703.0928,
+    "p_valor": 0.0,
+    "interpretacion": "Hay diferencia entre grupos"
   },
   "graficas": [
     "01_normalidad.png",
@@ -161,36 +161,36 @@
     "normalizacion": "MinMaxScaler (rango 0-1)",
     "pca_componentes": 3,
     "varianza_explicada": [
-      0.3305,
-      0.2549,
-      0.1966
+      0.3672,
+      0.269,
+      0.1446
     ],
-    "varianza_total_pct": 78.19
+    "varianza_total_pct": 78.08
   },
   "no_supervisado": {
     "algoritmo": "KMeans",
     "n_clusters": 4,
-    "silhouette": 0.2804,
+    "silhouette": 0.6793,
     "interpretacion_silhouette": "Cercano a 1 = clusters bien separados"
   },
   "clasificacion": {
     "algoritmo": "RandomForestClassifier",
     "objetivo": "Predecir cluster (basado en KMeans)",
-    "accuracy": 0.0,
-    "reporte": "              precision    recall  f1-score   support\n\n           0       0.00      0.00      0.00       1.0\n           1       0.00      0.00      0.00       0.0\n           3       0.00      0.00      0.00       1.0\n\n    accuracy                           0.00       2.0\n   macro avg       0.00      0.00      0.00       2.0\nweighted avg       0.00      0.00      0.00       2.0\n"
+    "accuracy": 1.0,
+    "reporte": "              precision    recall  f1-score   support\n\n           0       1.00      1.00      1.00         5\n           1       1.00      1.00      1.00         7\n           2       1.00      1.00      1.00         5\n           3       1.00      1.00      1.00         6\n\n    accuracy                           1.00        23\n   macro avg       1.00      1.00      1.00        23\nweighted avg       1.00      1.00      1.00        23\n"
   },
   "regresion": {
     "algoritmo": "LinearRegression",
-    "r2": -64.8959,
-    "mae": 3990.38,
-    "mse": 18655388.06,
-    "rmse": 4319.19
+    "r2": 0.9991,
+    "mae": 162.52,
+    "mse": 43343.27,
+    "rmse": 208.19
   },
   "ann": {
     "algoritmo": "MLPRegressor",
     "capas": "64, 32",
-    "r2": -17.9603,
-    "mae": 1774.81,
-    "mse": 5367730.62
+    "r2": 0.947,
+    "mae": 1032.76,
+    "mse": 2457953.24
   }
 }
