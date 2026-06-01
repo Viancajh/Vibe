@@ -118,15 +118,19 @@ async function loadProduct() {
 }
 
 async function loadPopularity() {
+    const bar = document.getElementById('popularityBar');
     try {
         const res  = await apiFetch(`/api/recommendations/purchase-probability/${PRODUCT_ID}`);
+        if (!res.ok) { if (bar) bar.style.display = 'none'; return; }
         const data = await res.json();
-        const pct  = Math.round(data.probability * 100);
+        const prob = Number(data.probability);
+        if (!Number.isFinite(prob)) { if (bar) bar.style.display = 'none'; return; }
+        const pct  = Math.round(prob * 100);
         document.getElementById('predText').textContent = pct > 70 ? `Muy popular entre clientes como tú (${pct}%)` : pct > 40 ? `Producto de interés moderado (${pct}%)` : `Producto de nicho (${pct}%)`;
         const fill = document.getElementById('probFill');
         fill.style.width      = `${pct}%`;
         fill.style.background = pct > 70 ? '#10b981' : pct > 40 ? '#f59e0b' : '#3b82f6';
-    } catch(e) {}
+    } catch(e) { if (bar) bar.style.display = 'none'; }
 }
 
 async function loadRelated() {
