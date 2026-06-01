@@ -142,8 +142,11 @@ def analisis_estadistico(df, metricas):
     print(f"    Outliers (price_norm): {len(outliers)}")
 
     # 4) Correlacion
+    # Una columna constante (varianza 0, p.ej. n_views) da correlacion NaN.
+    # json.dump escribe NaN literal y JSON.parse del navegador lo rechaza,
+    # asi que lo convertimos a None (null) antes de serializar.
     corr = df[VARS_EDA + ["purchased"]].corr().round(3)
-    metricas["correlacion"] = corr.to_dict()
+    metricas["correlacion"] = corr.where(corr.notna(), None).to_dict()
     print("    Matriz de correlacion calculada")
 
     # 5) ANOVA: purchased (0 vs 1) vs n_cart

@@ -2,6 +2,7 @@
 #  routes/ml_lab.py — API del laboratorio ML (lista de cotejo)
 # =============================================================
 import json
+import math
 import os
 import pickle
 
@@ -12,6 +13,19 @@ ML_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ml")
 METRICAS_PATH = os.path.join(ML_DIR, "proyecto_metricas.json")
 
 ml_lab_bp = Blueprint("ml_lab", __name__, url_prefix="/api/ml")
+
+
+def _limpiar_nan(obj):
+    """Reemplaza NaN/Infinity por None: JSON.parse del navegador los rechaza.
+    Aparecen, p.ej., en la matriz de correlacion cuando una columna es
+    constante (varianza cero -> correlacion de Pearson indefinida)."""
+    if isinstance(obj, dict):
+        return {k: _limpiar_nan(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_limpiar_nan(v) for v in obj]
+    if isinstance(obj, float) and not math.isfinite(obj):
+        return None
+    return obj
 
 
 def _cargar_pkl(nombre):
@@ -30,7 +44,7 @@ def metricas():
             "error": "Aun no hay metricas. Ejecuta: python ml/analisis_proyecto.py",
         }), 404
     with open(METRICAS_PATH, encoding="utf-8") as f:
-        return jsonify(json.load(f)), 200
+        return jsonify(_limpiar_nan(json.load(f))), 200
 
 
 @ml_lab_bp.route("/graficas")
